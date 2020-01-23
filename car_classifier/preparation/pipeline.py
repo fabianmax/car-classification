@@ -42,7 +42,6 @@ def get_image(filename, size=(212, 320)):
     image = tf.image.decode_jpeg(image)
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize_with_crop_or_pad(image, target_height=size[0], target_width=size[1])
-    #image = tf.image.per_image_standardization(image)
     image = image / 255.0
     return image
 
