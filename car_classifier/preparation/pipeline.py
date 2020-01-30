@@ -46,19 +46,20 @@ def get_image(filename, size=(212, 320)):
     return image
 
 
-def parse_file(filename, classes):
+def parse_file(filename, classes, input_size):
     """
     Function to parse files; loading images from file path and creating (one hot encoded) labels
 
     Args:
         filename: filename (including full path)
         classes: list of all classes for encoding
+        input_size: size of images (output size)
 
     Returns:
         tuple of image and (one hot encoded) label
     """
     label = get_label(filename)
-    image = get_image(filename)
+    image = get_image(filename, size=input_size)
 
     target = one_hot_encode(classes=classes, label=label)
 
@@ -87,6 +88,7 @@ def one_hot_encode(classes, label):
 def construct_ds(input_files,
                  batch_size,
                  classes,
+                 input_size=(212, 320),
                  prefetch_size=10,
                  shuffle_size=32):
     """
@@ -96,6 +98,7 @@ def construct_ds(input_files,
         input_files: list of files
         batch_size: number of observations in batch
         classes: list with all class labels
+        input_size: size of images (output size)
         prefetch_size: buffer size (number of batches to prefetch)
         shuffle_size:
 
@@ -105,7 +108,7 @@ def construct_ds(input_files,
     # Create tf.data.Dataset from list of files
     file_ds = tf.data.Dataset.from_tensor_slices(input_files)
 
-    ds = file_ds.map(lambda x: parse_file(x, classes=classes))
+    ds = file_ds.map(lambda x: parse_file(x, classes=classes, input_size=input_size))
 
     # Shuffle data
     # and prefetch batches
