@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from car_classifier.preparation.pipeline import construct_ds
+from car_classifier.modeling import TransferModel
 
 from tensorflow.keras.applications import ResNet50V2
 from tensorflow.keras import Model
@@ -18,6 +19,7 @@ INPUT_DATA_DIR = 'data/raw/'
 INPUT_SHAPE = (212, 320, 3)
 BATCH_SIZE = 32
 TARGET = 'make'
+BASE = 'VGG16'
 
 # All available training images
 files = [file for file in os.listdir(INPUT_DATA_DIR) if file.endswith(".jpg")]
@@ -37,6 +39,24 @@ files_train, files_valid = train_test_split(files_train, test_size=0.25)
 ds_train = construct_ds(input_files=files_train, batch_size=BATCH_SIZE, classes=[x.lower() for x in classes])
 ds_valid = construct_ds(input_files=files_valid, batch_size=BATCH_SIZE, classes=[x.lower() for x in classes])
 ds_test = construct_ds(input_files=files_test, batch_size=BATCH_SIZE, classes=[x.lower() for x in classes])
+
+# Init base model and compile
+model = TransferModel(base=BASE, shape=INPUT_SHAPE, classes=classes)
+model.compile()
+
+# Train model using defined tf.data.Datasets
+model.train(ds_train=ds_train, ds_valid=ds_valid, epochs=10)
+
+# Plot accuracy on training and validation data sets
+model.plot()
+
+# Evaluate performance on testing data
+model.evaluate(ds_test=ds_test)
+
+
+
+
+
 
 # Initialize base model from ResNet50
 base_model = ResNet50V2(include_top=False,
