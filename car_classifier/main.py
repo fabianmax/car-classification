@@ -6,12 +6,6 @@ import pandas as pd
 from car_classifier.preparation.pipeline import construct_ds
 from car_classifier.modeling import TransferModel
 
-from tensorflow.keras.applications import ResNet50V2
-from tensorflow.keras import Model
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping
-
 from sklearn.model_selection import train_test_split
 
 # Gobal settings
@@ -52,43 +46,6 @@ model.plot()
 
 # Evaluate performance on testing data
 model.evaluate(ds_test=ds_test)
-
-
-
-
-
-
-# Initialize base model from ResNet50
-base_model = ResNet50V2(include_top=False,
-                        input_shape=INPUT_SHAPE,
-                        weights='imagenet')
-
-base_model.trainable = False
-
-# Modify ResNet for own task
-x = base_model.output
-x = GlobalAveragePooling2D(data_format='channels_last')(x)
-output = Dense(len(classes), activation='softmax')(x)
-
-final_model = Model(base_model.input, output)
-
-final_model.compile(loss="categorical_crossentropy",
-                    optimizer=Adam(0.0001),
-                    metrics=["categorical_accuracy"])
-
-# Training callbacks
-early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, restore_best_weights=True)
-callbacks = [early_stopping]
-
-# Fitting
-history = final_model.fit(ds_train,
-                          epochs=1,
-                          validation_data=ds_valid,
-                          callbacks=callbacks)
-
-# Evaluation
-final_model.evaluate(ds_test)
-
 
 
 # ---------
