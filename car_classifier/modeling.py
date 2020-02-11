@@ -119,9 +119,9 @@ class TransferModel:
         p = self.model.predict(ds_new)
 
         if proba:
-            return [np.argmax(x) for x in p]
-        else:
             return p
+        else:
+            return [np.argmax(x) for x in p]
 
     def plot(self):
         """
@@ -132,8 +132,10 @@ class TransferModel:
         if self.history is None:
             AttributeError("No training history available, call TransferModel.train first")
 
-        plt.plot(self.history.history['acc'])
-        plt.plot(self.history.history['val_acc'])
+        metric = self.model.metrics_names[1]
+
+        plt.plot(self.history.history[metric])
+        plt.plot(self.history.history['val_' + metric])
         plt.title('Model Accuracy')
         plt.ylabel('Accuracy')
         plt.xlabel('Epoch')
