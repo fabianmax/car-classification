@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
@@ -71,7 +72,7 @@ class TransferModel:
             Training history in self.history
         """
 
-        # TODO make ds_valid optional!
+        # TODO make ds_valid optional
 
         # Define early stopping as callback
         early_stopping = EarlyStopping(monitor='val_loss',
@@ -102,6 +103,25 @@ class TransferModel:
 
         # TODO add an function return
         self.model.evaluate(ds_test)
+
+    def predict(self, ds_new: tf.data.Dataset, proba=True):
+        """
+        Prediction method
+
+        Args:
+            ds_new: New data as tf.data.Dataset
+            proba: Boolean if probabilities should be returned
+
+        Returns:
+            class labels or probabilities
+        """
+
+        p = self.model.predict(ds_new)
+
+        if proba:
+            return [np.argmax(x) for x in p]
+        else:
+            return p
 
     def plot(self):
         """
