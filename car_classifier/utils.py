@@ -79,9 +79,17 @@ def show_image(image, label=None, shape=False):
         plt.title(image.numpy().shape)
 
 
-def show_batch(ds, batch_size=32, scaled=True):
+def show_batch(ds, classes, rescale=True):
     """
     Function to show a batch of images including labels from tf.data object
+
+    Args:
+        ds: a (batched) tf.data.Dataset
+        classes: a list of all classes (in order of one-hot-encoding)
+        rescale: boolen whether to multiple image values by 255
+
+    Returns:
+        matplotlib.pyplot
     """
 
     plt.figure(figsize=(10, 10))
@@ -89,13 +97,15 @@ def show_batch(ds, batch_size=32, scaled=True):
     for image, label in ds.take(1):
         image_array = image.numpy()
         label_array = label.numpy()
+        batch_size = image_array.shape[0]
         for idx in range(batch_size):
+            label = classes[np.argmax(label_array[idx])]
             ax = plt.subplot(np.ceil(batch_size / 4), 4, idx + 1)
-            if scaled:
+            if rescale:
                 plt.imshow(image_array[idx] * 255)
             else:
                 plt.imshow(image_array[idx])
-            plt.title(label_array[idx].decode('UTF-8') + ' ' + str(image_array[idx].shape), fontsize=10)
+            plt.title(label + ' ' + str(image_array[idx].shape), fontsize=10)
             plt.axis('off')
 
 

@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from car_classifier.preparation.pipeline import construct_ds
+from car_classifier.pipeline import construct_ds
 from car_classifier.modeling import TransferModel
 
 from sklearn.model_selection import train_test_split
@@ -13,7 +13,7 @@ INPUT_DATA_DIR = 'data/raw/'
 INPUT_SHAPE = (212, 320, 3)
 BATCH_SIZE = 32
 TARGET = 'make'
-BASE = 'VGG16'
+BASE = 'ResNet'
 
 # All available training images
 files = [file for file in os.listdir(INPUT_DATA_DIR) if file.endswith(".jpg")]
@@ -51,7 +51,7 @@ model.evaluate(ds_test=ds_test)
 # ---------
 test_batch = ds_train.take(1)
 
-p = final_model.predict(test_batch)
+p = model.predict(test_batch)
 
 pred = [np.argmax(x) for x in p]
 
