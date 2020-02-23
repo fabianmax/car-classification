@@ -62,7 +62,11 @@ class TransferModel:
                            optimizer=Adam(0.0001),
                            metrics=["categorical_accuracy"])
 
-    def train(self, ds_train: tf.data.Dataset, epochs: int, ds_valid: tf.data.Dataset = None):
+    def train(self,
+              ds_train: tf.data.Dataset,
+              epochs: int,
+              steps_per_epoch: int = None,
+              ds_valid: tf.data.Dataset = None):
         """
         Training method
 
@@ -70,6 +74,7 @@ class TransferModel:
             ds_train: training data as tf.data.Dataset
             ds_valid: validation data as tf.data.Dataset
             epochs: number of epochs to train
+            steps_per_epoch: Number of steps per epoch
 
         Returns
             Training history in self.history
@@ -86,6 +91,7 @@ class TransferModel:
         # Fitting
         self.history = self.model.fit(ds_train,
                                       epochs=epochs,
+                                      steps_per_epoch=steps_per_epoch,
                                       validation_data=ds_valid,
                                       callbacks=callbacks)
 
