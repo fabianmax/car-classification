@@ -110,7 +110,7 @@ def show_batch(ds, classes, rescale=True, size=(10, 10), title=None):
     if title is not None:
         plt.suptitle(title)
 
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.show()
 
 
