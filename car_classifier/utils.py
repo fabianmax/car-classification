@@ -6,9 +6,6 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from google.cloud import storage
 
-import multiprocessing
-from joblib import Parallel, delayed
-
 
 def open_file_structure(path, clean=True):
     """
@@ -79,7 +76,7 @@ def show_image(image, label=None, shape=False):
         plt.title(image.numpy().shape)
 
 
-def show_batch(ds, classes, rescale=True):
+def show_batch(ds, classes, rescale=True, size=(10, 10), title=None):
     """
     Function to show a batch of images including labels from tf.data object
 
@@ -87,12 +84,14 @@ def show_batch(ds, classes, rescale=True):
         ds: a (batched) tf.data.Dataset
         classes: a list of all classes (in order of one-hot-encoding)
         rescale: boolen whether to multiple image values by 255
+        size: tuple giving plot size
+        title: plot title
 
     Returns:
         matplotlib.pyplot
     """
 
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=size)
 
     for image, label in ds.take(1):
         image_array = image.numpy()
@@ -107,6 +106,12 @@ def show_batch(ds, classes, rescale=True):
                 plt.imshow(image_array[idx])
             plt.title(label + ' ' + str(image_array[idx].shape), fontsize=10)
             plt.axis('off')
+
+    if title is not None:
+        plt.suptitle(title)
+
+    plt.tight_layout()
+    plt.show()
 
 
 class GoogleCloudStorage:
