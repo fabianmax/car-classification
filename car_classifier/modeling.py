@@ -25,6 +25,7 @@ class TransferModel:
         self.history = None
 
         # Class allows for two base models (VGG16 oder ResNet)
+        # Use pre-trained ResNet model
         if base == 'ResNet':
             self.base_model = ResNet50V2(include_top=False,
                                          input_shape=self.shape,
@@ -35,6 +36,7 @@ class TransferModel:
             add_to_base = self.base_model.output
             add_to_base = GlobalAveragePooling2D(data_format='channels_last')(add_to_base)
 
+        # Use pre-trained VGG16
         elif base == 'VGG16':
             self.base_model = VGG16(include_top=False,
                                     input_shape=self.shape,
@@ -48,6 +50,7 @@ class TransferModel:
             add_to_base = Dropout(0.25)(add_to_base)
             add_to_base = Dense(1024, activation="relu")(add_to_base)
 
+        # Add final output layer
         new_output = Dense(len(self.classes), activation="softmax")(add_to_base)
         self.model = Model(self.base_model.input, new_output)
 
@@ -59,7 +62,7 @@ class TransferModel:
                            optimizer=Adam(0.0001),
                            metrics=["categorical_accuracy"])
 
-    def train(self, ds_train: tf.data.Dataset, ds_valid: tf.data.Dataset, epochs):
+    def train(self, ds_train: tf.data.Dataset, epochs: int, ds_valid: tf.data.Dataset = None):
         """
         Training method
 
@@ -71,8 +74,6 @@ class TransferModel:
         Returns
             Training history in self.history
         """
-
-        # TODO make ds_valid optional
 
         # Define early stopping as callback
         early_stopping = EarlyStopping(monitor='val_loss',
@@ -101,10 +102,10 @@ class TransferModel:
               None
         """
 
-        # TODO add an function return
+        # TODO add a function return
         self.model.evaluate(ds_test)
 
-    def predict(self, ds_new: tf.data.Dataset, proba=True):
+    def predict(self, ds_new: tf.data.Dataset, proba: bool = True):
         """
         Prediction method
 
@@ -123,7 +124,7 @@ class TransferModel:
         else:
             return [np.argmax(x) for x in p]
 
-    def plot(self):
+    def plot(self, what: str = 'metric'):
         """
         Method for training/validation visualization
         Takes self.history and plots it
@@ -132,12 +133,23 @@ class TransferModel:
         if self.history is None:
             AttributeError("No training history available, call TransferModel.train first")
 
-        metric = self.model.metrics_names[1]
+        if what not in ['metric', 'loss']:
+            AttributeError(f'type must be either "loss" or "metric"')
 
-        plt.plot(self.history.history[metric])
-        plt.plot(self.history.history['val_' + metric])
-        plt.title('Model Accuracy')
-        plt.ylabel('Accuracy')
+        if what == 'metric':
+            metric = self.model.metrics_names[1]
+            y_1 = self.history.history[metric]
+            y_2 = self.history.history['val_' + metric]
+            y_label = metric
+        elif what == 'loss':
+            y_1 = self.history.history['loss']
+            y_2 = self.history.history['val_loss']
+            y_label = 'loss'
+
+        plt.plot(y_1)
+        plt.plot(y_2)
+        plt.title('Model Performance')
+        plt.ylabel(y_label)
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper left')
         plt.show()

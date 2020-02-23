@@ -110,8 +110,8 @@ def construct_ds(input_files,
 
     ds = file_ds.map(lambda x: parse_file(x, classes=classes, input_size=input_size))
 
-    # Shuffle data
-    # and prefetch batches
+    # Repeat, shuffle, batch and prefetch data
+    ds = ds.repeat()
     ds = ds.shuffle(buffer_size=shuffle_size)
     ds = ds.batch(batch_size=batch_size)
     ds = ds.prefetch(buffer_size=prefetch_size)
