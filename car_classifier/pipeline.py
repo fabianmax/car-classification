@@ -10,7 +10,7 @@ def get_label(filename, label_type='make'):
         label_type: which type of label is needed (either 'make' or 'model')
 
     Returns:
-        tf.Tensor with label
+        tf.tensor with label
 
     Raises:
         ValueError: If illegal value argument
@@ -24,7 +24,7 @@ def get_label(filename, label_type='make'):
     elif label_type == 'model':
         return tf.strings.lower(label[0] + '_' + label[1])
     else:
-        raise ValueError('label must be either "make" or "model" and not', label_type)
+        raise ValueError('label must be either "make" or "model" and not ', label_type)
 
 
 def get_image(filename, size=(212, 320)):
@@ -100,10 +100,10 @@ def construct_ds(input_files,
         classes: list with all class labels
         input_size: size of images (output size)
         prefetch_size: buffer size (number of batches to prefetch)
-        shuffle_size:
+        shuffle_size: shuffle size (size of buffer to shuffle from)
 
     Returns:
-        buffered and prefetched tf.data object with (image, label)
+        buffered and prefetched tf.data object with (image, label) tuple
     """
     # Create tf.data.Dataset from list of files
     file_ds = tf.data.Dataset.from_tensor_slices(input_files)
@@ -111,10 +111,10 @@ def construct_ds(input_files,
     ds = file_ds.map(lambda x: parse_file(x, classes=classes, input_size=input_size))
 
     # Repeat, shuffle, batch and prefetch data
-    # ds = ds.repeat()
     ds = ds.shuffle(buffer_size=shuffle_size)
     ds = ds.batch(batch_size=batch_size)
     ds = ds.prefetch(buffer_size=prefetch_size)
+    #ds = ds.repeat()
 
     return ds
 

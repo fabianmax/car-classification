@@ -3,8 +3,8 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 
 from tensorflow.keras.applications import ResNet50V2, VGG16
-from tensorflow.keras import Model
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Flatten, Dropout
+from tensorflow.keras import Model, Input
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Flatten, Dropout, Conv2D
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 
@@ -23,6 +23,8 @@ class TransferModel:
         self.shape = shape
         self.classes = classes
         self.history = None
+        self.base = None
+        self.model = None
 
         # Class allows for two base models (VGG16 oder ResNet)
         # Use pre-trained ResNet model
