@@ -85,12 +85,36 @@ def one_hot_encode(classes, label):
     return y
 
 
+def image_augment(image, label):
+    """
+    Function for image augmentation
+
+    Args:
+        image: Images from tf.data.Dataset
+        label: Labels from tf.data.Dataset
+
+    Returns:
+        Tuple of image, label
+    """
+
+    image = tf.image.random_flip_left_right(image)
+    image = tf.image.random_brightness(image, max_delta=0.1 / 255.0)
+    # image = tf.image.random_saturation(image, lower=0, upper=0.5)
+    # image = tf.image.random_contrast(image, lower=0, upper=1.2)
+
+    # Make sure the image is still in [0, 1]
+    image = tf.clip_by_value(image, 0.0, 1.0)
+
+    return image, label
+
+
 def construct_ds(input_files,
                  batch_size,
                  classes,
                  input_size=(212, 320),
                  prefetch_size=10,
-                 shuffle_size=32):
+                 shuffle_size=32,
+                 augment=False):
     """
     Function to construct a tf.data set from files
 
@@ -101,20 +125,27 @@ def construct_ds(input_files,
         input_size: size of images (output size)
         prefetch_size: buffer size (number of batches to prefetch)
         shuffle_size: shuffle size (size of buffer to shuffle from)
+        augment: boolen if image augmentation is needed
 
     Returns:
         buffered and prefetched tf.data object with (image, label) tuple
     """
     # Create tf.data.Dataset from list of files
-    file_ds = tf.data.Dataset.from_tensor_slices(input_files)
+    ds = tf.data.Dataset.from_tensor_slices(input_files)
 
-    ds = file_ds.map(lambda x: parse_file(x, classes=classes, input_size=input_size))
-
-    # Repeat, shuffle, batch and prefetch data
+    # Shuffle files
     ds = ds.shuffle(buffer_size=shuffle_size)
+
+    # Load image/labels
+    ds = ds.map(lambda x: parse_file(x, classes=classes, input_size=input_size))
+
+    # Image augmentation
+    if augment:
+        ds = ds.map(image_augment)
+
+    # Batch and prefetch data
     ds = ds.batch(batch_size=batch_size)
     ds = ds.prefetch(buffer_size=prefetch_size)
-    #ds = ds.repeat()
 
     return ds
 

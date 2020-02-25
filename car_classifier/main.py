@@ -5,6 +5,7 @@ import pandas as pd
 
 from car_classifier.pipeline import construct_ds
 from car_classifier.modeling import TransferModel
+from car_classifier.utils import show_batch
 
 from sklearn.model_selection import train_test_split
 
@@ -25,14 +26,24 @@ if TARGET == 'make':
 if TARGET == 'model':
     classes = list(set([file.split('_')[0] + '_' + file.split('_')[1] for file in files]))
 
+# Targets in list
+classes_lower = [x.lower() for x in classes]
+
 # Split paths into train, valid, and test
 files_train, files_test = train_test_split(file_paths, test_size=0.25)
 files_train, files_valid = train_test_split(files_train, test_size=0.25)
 
 # Construct tf.data.Dataset from file paths
-ds_train = construct_ds(input_files=files_train, batch_size=BATCH_SIZE, classes=[x.lower() for x in classes])
-ds_valid = construct_ds(input_files=files_valid, batch_size=BATCH_SIZE, classes=[x.lower() for x in classes])
-ds_test = construct_ds(input_files=files_test, batch_size=BATCH_SIZE, classes=[x.lower() for x in classes])
+ds_train = construct_ds(input_files=files_train, batch_size=BATCH_SIZE, classes=classes_lower, input_size=INPUT_SHAPE)
+ds_valid = construct_ds(input_files=files_valid, batch_size=BATCH_SIZE, classes=classes_lower, input_size=INPUT_SHAPE)
+ds_test = construct_ds(input_files=files_test, batch_size=BATCH_SIZE, classes=classes_lower, input_size=INPUT_SHAPE)
+
+# Show examples from one batch
+plot_size = (18, 18)
+
+show_batch(ds_train, classes, size=plot_size, title='Training data')
+show_batch(ds_valid, classes, size=plot_size, title='Validation data')
+show_batch(ds_test, classes, size=plot_size, title='Testing data')
 
 # Init base model and compile
 model = TransferModel(base=BASE, shape=INPUT_SHAPE, classes=classes)
