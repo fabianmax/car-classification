@@ -9,6 +9,8 @@ from car_classifier.utils import show_batch
 
 from sklearn.model_selection import train_test_split
 
+from tensorflow.keras.optimizers import Adam
+
 # Gobal settings
 INPUT_DATA_DIR = 'data/raw/'
 INPUT_SHAPE = (212, 320, 3)
@@ -47,7 +49,9 @@ show_batch(ds_test, classes, size=plot_size, title='Testing data')
 
 # Init base model and compile
 model = TransferModel(base=BASE, shape=INPUT_SHAPE, classes=classes)
-model.compile()
+model.compile(loss="categorical_crossentropy",
+              optimizer=Adam(0.0001),
+              metrics=["categorical_accuracy"])
 
 # Train model using defined tf.data.Datasets
 model.train(ds_train=ds_train, ds_valid=ds_valid, epochs=10)

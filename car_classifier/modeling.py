@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.applications import ResNet50V2, VGG16
 from tensorflow.keras import Model, Input
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Flatten, Dropout, Conv2D
-from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 
 
@@ -56,13 +55,12 @@ class TransferModel:
         new_output = Dense(len(self.classes), activation="softmax")(add_to_base)
         self.model = Model(self.base_model.input, new_output)
 
-    def compile(self):
+    def compile(self, **kwargs):
         """
         Compile method
         """
-        self.model.compile(loss="categorical_crossentropy",
-                           optimizer=Adam(0.0001),
-                           metrics=["categorical_accuracy"])
+
+        self.model.compile(**kwargs)
 
     def train(self,
               ds_train: tf.data.Dataset,
