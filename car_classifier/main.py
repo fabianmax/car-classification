@@ -48,7 +48,11 @@ show_batch(ds_valid, classes, size=plot_size, title='Validation data')
 show_batch(ds_test, classes, size=plot_size, title='Testing data')
 
 # Init base model and compile
-model = TransferModel(base=BASE, shape=INPUT_SHAPE, classes=classes)
+model = TransferModel(base=BASE,
+                      shape=INPUT_SHAPE,
+                      classes=classes,
+                      unfreeze=['conv5', 'post'])
+
 model.compile(loss="categorical_crossentropy",
               optimizer=Adam(0.0001),
               metrics=["categorical_accuracy"])

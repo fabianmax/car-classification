@@ -1,5 +1,5 @@
 import glob
-from car_classifier.preparation.utils import GoogleCloudStorage
+from car_classifier.utils import GoogleCloudStorage
 
 # Init custom class for uploading
 gcs = GoogleCloudStorage()

@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from car_classifier.preparation.utils import open_file_structure, expand_column
+from car_classifier.utils import open_file_structure, expand_column
 
 # Get jpg-files in raw folder
 files = [file for file in os.listdir('data/raw') if file.endswith(".jpg")]
