@@ -1,5 +1,7 @@
 import tensorflow as tf
 
+from tensorflow.keras.applications import ResNet50V2
+
 
 def get_label(filename, label_type='make'):
     """
@@ -150,6 +152,14 @@ def construct_ds(input_files,
     return ds
 
 
+def filter_ds(ds):
 
+    # Get shape of image from ds by taking one batch
+    image, label = next(iter(ds.take(1)))
+    image_shape = (image.shape[1], image.shape[2], image.shape[3])
 
+    pre_filter_model = ResNet50V2(include_top=True,
+                                  input_shape=(224, 224, 3),
+                                  weights='imagenet')
 
+    p = pre_filter_model.predict(ds)

@@ -9,6 +9,8 @@ from tensorflow.keras import Model, Input
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Flatten, Dropout, Conv2D
 from tensorflow.keras.callbacks import EarlyStopping
 
+from typing import Union
+
 
 class TransferModel:
 
@@ -68,24 +70,27 @@ class TransferModel:
         self.freeze = pd.DataFrame(layers, columns=['Layer Type', 'Layer Name', 'Layer Trainable'])
 
     @staticmethod
-    def _make_trainable(model, patterns: list):
+    def _make_trainable(model, patterns: Union[str, list]):
         """
-        Helper function to make certain layers trainable
+        Helper function to make certain (or even all) layers trainable
 
         Args:
             model: tf.Model
-            patterns: list of patterns as str to match layer names
+            patterns: list or str == 'all', of patterns as str to match layer names
 
         Returns:
             model
         """
-        for layer in model.layers:
-            for pattern in patterns:
-                regex = re.compile(pattern)
-                if regex.search(layer.name):
-                    layer.trainable = True
-                else:
-                    pass
+        if isinstance(patterns, str) and patterns == 'all':
+            model.trainable = True
+        else:
+            for layer in model.layers:
+                for pattern in patterns:
+                    regex = re.compile(pattern)
+                    if regex.search(layer.name):
+                        layer.trainable = True
+                    else:
+                        pass
 
         return model
 
