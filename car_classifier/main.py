@@ -13,7 +13,7 @@ from tensorflow.keras.optimizers import Adam
 
 # Gobal settings
 INPUT_DATA_DIR = 'data/raw/'
-INPUT_SHAPE = (212, 320, 3)
+INPUT_SHAPE = (224, 224, 3)
 BATCH_SIZE = 32
 TARGET = 'make'
 BASE = 'ResNet'
@@ -51,7 +51,7 @@ show_batch(ds_test, classes, size=plot_size, title='Testing data')
 model = TransferModel(base=BASE,
                       shape=INPUT_SHAPE,
                       classes=classes,
-                      unfreeze=['conv5', 'post'])
+                      unfreeze='all')
 
 model.compile(loss="categorical_crossentropy",
               optimizer=Adam(0.0001),
@@ -66,15 +66,3 @@ model.plot()
 # Evaluate performance on testing data
 model.evaluate(ds_test=ds_test)
 
-
-# ---------
-test_batch = ds_train.take(1)
-
-p = model.predict(test_batch)
-
-pred = [np.argmax(x) for x in p]
-
-for img, lab in test_batch.as_numpy_iterator():
-    actual = np.argmax(lab, axis=1)
-
-pd.DataFrame({'actual': actual, 'pred': pred})
