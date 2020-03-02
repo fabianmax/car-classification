@@ -76,7 +76,7 @@ def show_image(image, label=None, shape=False):
         plt.title(image.numpy().shape)
 
 
-def show_batch(ds, classes, rescale=True, size=(10, 10), title=None):
+def show_batch(ds, classes, rescale=False, size=(10, 10), title=None):
     """
     Function to show a batch of images including labels from tf.data object
 

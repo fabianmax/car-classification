@@ -14,6 +14,8 @@ from typing import Union
 
 class TransferModel:
 
+    # TODO: Implement save/load
+
     def __init__(self, base: str, shape: tuple, classes: list, unfreeze: list = None):
         """
         Class for transfer learning from either VGG16 or ResNet
