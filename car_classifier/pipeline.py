@@ -3,9 +3,9 @@ import tensorflow as tf
 from tensorflow.keras.applications import ResNet50V2
 
 
-def get_label(filename, label_type='make'):
+def get_label(filename: str, label_type: str = 'make'):
     """
-    Function to get label from file_name
+    Function to get label from filename
 
     Args:
         filename: file name to extract label from
@@ -17,25 +17,29 @@ def get_label(filename, label_type='make'):
     Raises:
         ValueError: If illegal value argument
     """
+
+    # Split full path in parts, make and model are contained in the last part
     parts = tf.strings.split(filename, '/')
     name = parts[-1]
     label = tf.strings.split(name, '_')
 
+    # The make is the first element of the filename
     if label_type == 'make':
         return tf.strings.lower(label[0])
+    # Model is the second element of the filename; model and make have to be combined
     elif label_type == 'model':
         return tf.strings.lower(label[0] + '_' + label[1])
     else:
         raise ValueError('label must be either "make" or "model" and not ', label_type)
 
 
-def get_image(filename, size=(212, 320)):
+def get_image(filename: str, size: tuple = (212, 320)):
     """
-    Function to lead image as tensor and resize it to specific size
+    Function to load image as tensor and resize it to specific size
 
     Args:
         filename: file name (path)
-        size: size of image after resizing
+        size: tuple (height, width) with size of image after resizing
 
     Returns:
         Image as tf.Tensor
@@ -47,7 +51,7 @@ def get_image(filename, size=(212, 320)):
     return image
 
 
-def parse_file(filename, classes, input_size):
+def parse_file(filename: str, classes: list, input_size: tuple):
     """
     Function to parse files; loading images from file path and creating (one hot encoded) labels
 
@@ -67,9 +71,9 @@ def parse_file(filename, classes, input_size):
     return image, target
 
 
-def one_hot_encode(classes, label):
+def one_hot_encode(classes: list, label):
     """
-    Function for one hot encoding of label
+    Function for one hot encoding of label, given a full list of possible classes
 
     Args:
         classes: list of all classes for encoding
@@ -100,8 +104,6 @@ def image_augment(image, label):
 
     image = tf.image.random_flip_left_right(image)
     image = tf.image.random_brightness(image, max_delta=0.1 / 255.0)
-    # image = tf.image.random_saturation(image, lower=0, upper=0.5)
-    # image = tf.image.random_contrast(image, lower=0, upper=1.2)
 
     # Make sure the image is still in [0, 1]
     image = tf.clip_by_value(image, 0.0, 1.0)
@@ -109,15 +111,15 @@ def image_augment(image, label):
     return image, label
 
 
-def construct_ds(input_files,
-                 batch_size,
-                 classes,
-                 input_size=(212, 320),
-                 prefetch_size=10,
-                 shuffle_size=32,
-                 augment=False):
+def construct_ds(input_files: list,
+                 batch_size: int,
+                 classes: list,
+                 input_size: tuple = (212, 320),
+                 prefetch_size: int = 10,
+                 shuffle_size: int = 32,
+                 augment: bool = False):
     """
-    Function to construct a tf.data set from files
+    Function to construct a tf.data.Dataset set from list of files
 
     Args:
         input_files: list of files
@@ -126,10 +128,10 @@ def construct_ds(input_files,
         input_size: size of images (output size)
         prefetch_size: buffer size (number of batches to prefetch)
         shuffle_size: shuffle size (size of buffer to shuffle from)
-        augment: boolen if image augmentation is needed
+        augment: boolen if image augmentation should be applied
 
     Returns:
-        buffered and prefetched tf.data object with (image, label) tuple
+        buffered and prefetched tf.data.Dataset object with (image, label) tuple
     """
     # Create tf.data.Dataset from list of files
     ds = tf.data.Dataset.from_tensor_slices(input_files)
@@ -150,15 +152,3 @@ def construct_ds(input_files,
 
     return ds
 
-
-def filter_ds(ds):
-
-    # Get shape of image from ds by taking one batch
-    image, label = next(iter(ds.take(1)))
-    image_shape = (image.shape[1], image.shape[2], image.shape[3])
-
-    pre_filter_model = ResNet50V2(include_top=True,
-                                  input_shape=(224, 224, 3),
-                                  weights='imagenet')
-
-    p = pre_filter_model.predict(ds)

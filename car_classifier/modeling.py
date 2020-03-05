@@ -8,6 +8,7 @@ from tensorflow.keras.applications import ResNet50V2, VGG16
 from tensorflow.keras import Model, Input
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Flatten, Dropout, Conv2D
 from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.preprocessing import image
 
 from typing import Union
 
@@ -96,11 +97,25 @@ class TransferModel:
 
         return model
 
+    def load(self, path: str):
+        """
+        Load a trained model into self.model
+
+        Args:
+            path: Path to saved model
+
+        Returns:
+            Nothing
+        """
+        if self.model is None:
+            self.model = tf.keras.models.load_model(path)
+        else:
+            raise AttributeError('Instance already contains a model, overwriting not possible')
+
     def compile(self, **kwargs):
         """
         Compile method
         """
-
         self.model.compile(**kwargs)
 
     def train(self,
@@ -108,15 +123,15 @@ class TransferModel:
               epochs: int,
               ds_valid: tf.data.Dataset = None):
         """
-        Training method
+        Trains model in ds_train with for epochs rounds
 
         Args:
             ds_train: training data as tf.data.Dataset
-            ds_valid: validation data as tf.data.Dataset
             epochs: number of epochs to train
+            ds_valid: optional validation data as tf.data.Dataset
 
         Returns
-            Training history in self.history
+            Training history from self.history
         """
 
         # Define early stopping as callback
@@ -137,21 +152,25 @@ class TransferModel:
 
     def evaluate(self, ds_test: tf.data.Dataset):
         """
-        Evaluation method
+        Evaluate model on ds_test
 
         Args:
             ds_test: Testing data as tf.data.Dataset
 
         Returns:
-              None
+              Dictionary with metrics and values on ds_test
         """
 
-        # TODO add a function return
-        self.model.evaluate(ds_test)
+        result = self.model.evaluate(ds_test)
+
+        if isinstance(result, int):
+            return {'loss': result}
+        else:
+            return dict(zip(self.model.metrics_names, result))
 
     def predict(self, ds_new: tf.data.Dataset, proba: bool = True):
         """
-        Prediction method
+        Predict class probs or labels on ds_new
 
         Args:
             ds_new: New data as tf.data.Dataset
@@ -168,17 +187,76 @@ class TransferModel:
         else:
             return [np.argmax(x) for x in p]
 
+    def predict_batch(self, ds_new: tf.data.Dataset, proba: bool = True):
+        """
+        Prediction method to predict values for a batch
+
+        Args:
+            ds_new: New data as tf.data.Dataset with image and label components
+            proba: Boolean if probabilities should be returned
+
+        Returns:
+            class labels or probabilities
+        """
+
+        for image, _ in ds_new.take(1):
+            p = self.model.predict(image)
+
+        if proba:
+            return p
+        else:
+            return [np.argmax(x) for x in p]
+
+    def predict_from_jpeg_path(self, filepath, classes):
+        """
+        Method to predict given a filepath to .jpeg as input
+
+        Args:
+          filepath: Path to file we want prediction for
+          classes:
+
+        Returns:
+          prediction class label
+
+        """
+        img = image.load_img(filepath, target_size=(224, 224))
+        img = image.img_to_array(img)
+        img /= 255.0
+        img = img.reshape(-1, *img.shape)
+        pred = self.predict(img, proba=False)
+        return classes[pred[0]]
+
+    def predict_from_array(self, img, classes):
+        """
+        Method to predict given an array input
+
+        Args:
+          img: Image array with shape (224, 224, 3) with values in [0, 1]
+          classes:
+
+        Returns:
+          prediction class label
+
+        """
+
+        # Reshape image to include additional dimension needed for prediction
+        img = img.reshape(-1, *img.shape)
+        pred = self.predict(img, proba=False)
+        return classes[pred[0]]
+
     def plot(self, what: str = 'metric'):
         """
-        Method for training/validation visualization
-        Takes self.history and plots it
+        Show a visualization of training and validation process
+
+        Args:
+            what: Plot training loss or metric?
         """
 
         if self.history is None:
             AttributeError("No training history available, call TransferModel.train first")
 
         if what not in ['metric', 'loss']:
-            AttributeError(f'type must be either "loss" or "metric"')
+            AttributeError(f'what must be either "loss" or "metric"')
 
         if what == 'metric':
             metric = self.model.metrics_names[1]
@@ -197,6 +275,3 @@ class TransferModel:
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper left')
         plt.show()
-
-
-
