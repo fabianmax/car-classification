@@ -15,8 +15,6 @@ from typing import Union
 
 class TransferModel:
 
-    # TODO: Implement save/load
-
     def __init__(self, base: str, shape: tuple, classes: list, unfreeze: list = None):
         """
         Class for transfer learning from either VGG16 or ResNet
@@ -111,6 +109,18 @@ class TransferModel:
             self.model = tf.keras.models.load_model(path)
         else:
             raise AttributeError('Instance already contains a model, overwriting not possible')
+
+    def save(self, filepath: str):
+        """
+        Save the model using tf.keras.model.save
+
+        Args:
+            filepath: (Full) Filepath to store model
+        """
+        if self.model is not None:
+            self.model.save(filepath=filepath)
+        else:
+            raise AttributeError('Model does not exist')
 
     def compile(self, **kwargs):
         """
