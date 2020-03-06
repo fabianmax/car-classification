@@ -1,8 +1,5 @@
 import os
 
-import numpy as np
-import pandas as pd
-
 from car_classifier.pipeline import construct_ds
 from car_classifier.modeling import TransferModel
 from car_classifier.utils import show_batch
@@ -11,7 +8,7 @@ from sklearn.model_selection import train_test_split
 
 from tensorflow.keras.optimizers import Adam
 
-# Gobal settings
+# Global settings
 INPUT_DATA_DIR = 'data/raw/'
 INPUT_SHAPE = (224, 224, 3)
 BATCH_SIZE = 32

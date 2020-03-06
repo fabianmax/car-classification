@@ -105,10 +105,7 @@ class TransferModel:
         Returns:
             Nothing
         """
-        if self.model is None:
-            self.model = tf.keras.models.load_model(path)
-        else:
-            raise AttributeError('Instance already contains a model, overwriting not possible')
+        self.model = tf.keras.models.load_model(path)
 
     def save(self, filepath: str):
         """
@@ -191,26 +188,6 @@ class TransferModel:
         """
 
         p = self.model.predict(ds_new)
-
-        if proba:
-            return p
-        else:
-            return [np.argmax(x) for x in p]
-
-    def predict_batch(self, ds_new: tf.data.Dataset, proba: bool = True):
-        """
-        Prediction method to predict values for a batch
-
-        Args:
-            ds_new: New data as tf.data.Dataset with image and label components
-            proba: Boolean if probabilities should be returned
-
-        Returns:
-            class labels or probabilities
-        """
-
-        for image, _ in ds_new.take(1):
-            p = self.model.predict(image)
 
         if proba:
             return p
