@@ -39,8 +39,16 @@ docker_run_cmd = f'docker run ' \
                  f'--name tf_serving ' \
                  f'tensorflow/serving'
 
+# If container is not running, create a new instance and run it
+docker_run_cmd_cond = f'if [ ! "$(docker ps -q -f name=tf_serving)" ]; then \n' \
+                      f'   if [ "$(docker ps -aq -f status=exited -f name=tf_serving)" ]; then \n' \
+                      f'   docker rm tf_serving \n' \
+                      f'   fi \n' \
+                      f'   {docker_run_cmd} \n' \
+                      f'fi'
+
 # Start container
-os.system(docker_run_cmd)
+os.system(docker_run_cmd_cond)
 
 # All available training images
 files = [file for file in os.listdir(INPUT_DATA_DIR) if file.endswith(".jpg")]
