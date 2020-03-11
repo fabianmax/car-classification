@@ -5,7 +5,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 
 from tensorflow.keras.applications import ResNet50V2, VGG16
-from tensorflow.keras import Model, Input
+from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Flatten, Dropout, Conv2D
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.preprocessing import image
@@ -15,7 +15,7 @@ from typing import Union
 
 class TransferModel:
 
-    def __init__(self, base: str, shape: tuple, classes: list, unfreeze: list = None):
+    def __init__(self, base: str, shape: tuple, classes: list, unfreeze: Union[list, str] = None):
         """
         Class for transfer learning from either VGG16 or ResNet
 

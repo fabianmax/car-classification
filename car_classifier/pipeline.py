@@ -51,7 +51,7 @@ def get_image(filename: str, size: tuple = (212, 320)):
     return image
 
 
-def parse_file(filename: str, classes: list, input_size: tuple):
+def parse_file(filename: str, classes: list, input_size: tuple, label_type: str):
     """
     Function to parse files; loading images from file path and creating (one hot encoded) labels
 
@@ -59,11 +59,12 @@ def parse_file(filename: str, classes: list, input_size: tuple):
         filename: filename (including full path)
         classes: list of all classes for encoding
         input_size: size of images (output size)
+        label_type: 'make' or 'model'
 
     Returns:
         tuple of image and (one hot encoded) label
     """
-    label = get_label(filename)
+    label = get_label(filename, label_type=label_type)
     image = get_image(filename, size=input_size)
 
     target = one_hot_encode(classes=classes, label=label)
@@ -114,6 +115,7 @@ def image_augment(image, label):
 def construct_ds(input_files: list,
                  batch_size: int,
                  classes: list,
+                 label_type: str,
                  input_size: tuple = (212, 320),
                  prefetch_size: int = 10,
                  shuffle_size: int = 32,
@@ -129,6 +131,7 @@ def construct_ds(input_files: list,
         prefetch_size: buffer size (number of batches to prefetch)
         shuffle_size: shuffle size (size of buffer to shuffle from)
         augment: boolen if image augmentation should be applied
+        label_type: 'make' or 'model'
 
     Returns:
         buffered and prefetched tf.data.Dataset object with (image, label) tuple
@@ -140,7 +143,7 @@ def construct_ds(input_files: list,
     ds = ds.shuffle(buffer_size=shuffle_size)
 
     # Load image/labels
-    ds = ds.map(lambda x: parse_file(x, classes=classes, input_size=input_size))
+    ds = ds.map(lambda x: parse_file(x, classes=classes, input_size=input_size, label_type=label_type))
 
     # Image augmentation
     if augment:
