@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from tensorflow.keras.applications import ResNet50V2
+from tensorflow.keras.applications.resnet_v2 import preprocess_input
 
 
 def get_label(filename: str, label_type: str = 'make'):
@@ -46,8 +46,10 @@ def get_image(filename: str, size: tuple = (212, 320)):
     """
     image = tf.io.read_file(filename)
     image = tf.image.decode_jpeg(image)
-    image = tf.image.convert_image_dtype(image, tf.float32)
+    # Use cast instead of convert_image_dtype to avoid rescaling
+    image = tf.cast(image, tf.float32)
     image = tf.image.resize_with_crop_or_pad(image, target_height=size[0], target_width=size[1])
+    image = preprocess_input(image)
     return image
 
 
@@ -130,7 +132,7 @@ def construct_ds(input_files: list,
         input_size: size of images (output size)
         prefetch_size: buffer size (number of batches to prefetch)
         shuffle_size: shuffle size (size of buffer to shuffle from)
-        augment: boolen if image augmentation should be applied
+        augment: boolean if image augmentation should be applied
         label_type: 'make' or 'model'
 
     Returns:

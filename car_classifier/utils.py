@@ -27,6 +27,9 @@ def show_batch(ds: tf.data.Dataset,
     # Take on batch from dataset and iterate over image-label-combination
     for image, label in ds.take(1):
         image_array = image.numpy()
+        # Undo scaling in preprocess_input or plotting
+        image_array += 1.0
+        image_array /= 2.0
         label_array = label.numpy()
         batch_size = image_array.shape[0]
         for idx in range(batch_size):
