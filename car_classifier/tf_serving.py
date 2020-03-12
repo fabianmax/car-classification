@@ -26,9 +26,11 @@ TARGET = 'make'
 MODEL_FOLDER = 'models'
 MODEL_SAVED_NAME = 'resnet_unfreeze_all_filtered.tf'
 MODEL_NAME = 'resnet_unfreeze_all_filtered'
+MODEL_VERSION = 1
 
+# Paths for volume mounting
 model_path_host = os.path.join(os.getcwd(), MODEL_FOLDER, MODEL_SAVED_NAME)
-model_path_guest = os.path.join('/models', MODEL_NAME, '1')
+model_path_guest = os.path.join('/models', MODEL_NAME, MODEL_VERSION)
 
 # Container start command
 docker_run_cmd = f'docker run ' \
@@ -54,12 +56,7 @@ os.system(docker_run_cmd_cond)
 files = [file for file in os.listdir(INPUT_DATA_DIR) if file.endswith(".jpg")]
 file_paths = [INPUT_DATA_DIR + file for file in files]
 
-# Create a list of all possible outcomes
-if TARGET == 'make':
-    classes = list(set([file.split('_')[0] for file in files]))
-if TARGET == 'model':
-    classes = list(set([file.split('_')[0] + '_' + file.split('_')[1] for file in files]))
-
+# Load list of targets
 file = open('models/classes_all_filtered.pkl', 'rb')
 classes = pickle.load(file)
 

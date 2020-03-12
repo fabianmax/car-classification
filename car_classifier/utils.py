@@ -46,6 +46,28 @@ def show_batch(ds: tf.data.Dataset,
     plt.show()
 
 
+def create_target_list(files: list, target: str = 'make') -> list:
+    """
+    Create a list of unique target classes from file names
+
+    Args:
+        files: a list of file names
+        target: either 'model' or 'make'
+
+    Returns:
+        list of classes
+    """
+
+    if target not in ['make', 'model']:
+        raise ValueError('target must be either "make" or "model"')
+
+    if target == 'make':
+        classes = list(set([file.split('_')[0] for file in files]))
+    if target == 'model':
+        classes = list(set([file.split('_')[0] + '_' + file.split('_')[1] for file in files]))
+
+    return classes
+
 
 
 
