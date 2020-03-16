@@ -27,13 +27,13 @@ class TransferModel:
         self.shape = shape
         self.classes = classes
         self.history = None
-        self.base = None
+        self.base = base
         self.model = None
         self.freeze = None
 
         # Class allows for two base models (VGG16 oder ResNet)
         # Use pre-trained ResNet model
-        if base == 'ResNet':
+        if self.base == 'ResNet':
             self.base_model = ResNet50V2(include_top=False,
                                          input_shape=self.shape,
                                          weights='imagenet')
@@ -46,7 +46,7 @@ class TransferModel:
             add_to_base = GlobalAveragePooling2D(data_format='channels_last', name='head_gap')(add_to_base)
 
         # Use pre-trained VGG16
-        elif base == 'VGG16':
+        elif self.base == 'VGG16':
             self.base_model = VGG16(include_top=False,
                                     input_shape=self.shape,
                                     weights='imagenet')
