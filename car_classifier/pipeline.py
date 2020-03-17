@@ -121,6 +121,7 @@ def construct_ds(input_files: list,
                  input_size: tuple = (212, 320),
                  prefetch_size: int = 10,
                  shuffle_size: int = 32,
+                 shuffle: bool = True,
                  augment: bool = False):
     """
     Function to construct a tf.data.Dataset set from list of files
@@ -132,6 +133,7 @@ def construct_ds(input_files: list,
         input_size: size of images (output size)
         prefetch_size: buffer size (number of batches to prefetch)
         shuffle_size: shuffle size (size of buffer to shuffle from)
+        shuffle: boolean specifying whether to shuffle dataset
         augment: boolean if image augmentation should be applied
         label_type: 'make' or 'model'
 
@@ -142,7 +144,8 @@ def construct_ds(input_files: list,
     ds = tf.data.Dataset.from_tensor_slices(input_files)
 
     # Shuffle files
-    ds = ds.shuffle(buffer_size=shuffle_size)
+    if shuffle:
+        ds = ds.shuffle(buffer_size=shuffle_size)
 
     # Load image/labels
     ds = ds.map(lambda x: parse_file(x, classes=classes, input_size=input_size, label_type=label_type))
