@@ -26,7 +26,7 @@ TARGET = 'make'
 MODEL_FOLDER = 'models'
 MODEL_SAVED_NAME = 'resnet_unfreeze_all_filtered.tf'
 MODEL_NAME = 'resnet_unfreeze_all_filtered'
-MODEL_VERSION = 1
+MODEL_VERSION = '1'
 
 # Paths for volume mounting
 model_path_host = os.path.join(os.getcwd(), MODEL_FOLDER, MODEL_SAVED_NAME)
