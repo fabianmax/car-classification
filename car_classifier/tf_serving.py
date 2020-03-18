@@ -25,11 +25,13 @@ INPUT_SHAPE = (224, 224, 3)
 TARGET = 'model'
 
 MODEL_FOLDER = 'models'
-MODEL_SAVED_NAME = 'resnet_all_unfreezed_filtered_augmented_training_0_71.tf'
+MODEL_SAVED_NAME = 'resnet_unfreeze_all_filtered.tf'
 MODEL_NAME = 'resnet_unfreeze_all_filtered'
+MODEL_VERSION = '1'
 
+# Paths for volume mounting
 model_path_host = os.path.join(os.getcwd(), MODEL_FOLDER, MODEL_SAVED_NAME)
-model_path_guest = os.path.join('/models', MODEL_NAME, '1')
+model_path_guest = os.path.join('/models', MODEL_NAME, MODEL_VERSION)
 
 # Container start command
 docker_run_cmd = f'docker run ' \
@@ -55,9 +57,9 @@ os.system(docker_run_cmd_cond)
 files = [file for file in os.listdir(INPUT_DATA_DIR) if file.endswith(".jpg")]
 file_paths = [INPUT_DATA_DIR + file for file in files]
 
-file = open('models/classes_all.pickle', 'rb')
+# Load list of targets
+file = open('models/classes_all_filtered.pkl', 'rb')
 classes = pickle.load(file)
-classes = classes['classes'].values
 
 # Get file
 path = sample(file_paths, 1)[0]
@@ -83,8 +85,7 @@ img = img.reshape(-1, *img.shape)
 # Send data as list to TF serving via json dump
 data = json.dumps({"signature_name": "serving_default", "instances": img.tolist()})
 headers = {"content-type": "application/json"}
-json_response = requests.post('http://localhost:8501/v1/models/resnet_unfreeze_all_filtered:predict', data=data,
-                              headers=headers)
+json_response = requests.post('http://localhost:8501/v1/models/resnet_unfreeze_all_filtered:predict', data=data, headers=headers)
 predictions = json.loads(json_response.text)['predictions']
 
 # Get label from prediction
