@@ -2,6 +2,7 @@ import tensorflow as tf
 
 from tensorflow.keras.applications.resnet_v2 import preprocess_input
 
+THRESHOLD = 0.7
 
 def get_label(filename: str, label_type: str = 'make'):
     """
@@ -106,10 +107,10 @@ def image_augment(image, label):
     """
 
     image = tf.image.random_flip_left_right(image)
-    image = tf.image.random_brightness(image, max_delta=0.1 / 255.0)
-
-    # Make sure the image is still in [0, 1]
-    image = tf.clip_by_value(image, 0.0, 1.0)
+    image = tf.image.random_brightness(image, max_delta=0.1)
+    image = tf.image.random_contrast(image, lower=0.8, upper=1.2)
+    # image = tf.image.random_saturation(image, lower=1, upper=1.1)
+    # image = tf.image.random_hue(image, max_delta=0.05)
 
     return image, label
 
@@ -151,7 +152,7 @@ def construct_ds(input_files: list,
     ds = ds.map(lambda x: parse_file(x, classes=classes, input_size=input_size, label_type=label_type))
 
     # Image augmentation
-    if augment:
+    if augment and tf.random.uniform((), minval=0, maxval=1, dtype=tf.dtypes.float32, seed=None, name=None) < 0.7:
         ds = ds.map(image_augment)
 
     # Batch and prefetch data

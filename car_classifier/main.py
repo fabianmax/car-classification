@@ -1,18 +1,20 @@
 import os
+import pandas as pd
 
 from car_classifier.pipeline import construct_ds
 from car_classifier.modeling import TransferModel
 from car_classifier.utils import show_batch
 
 from sklearn.model_selection import train_test_split
+from sklearn.utils.class_weight import compute_class_weight
 
 from tensorflow.keras.optimizers import Adam
 
 # Global settings
-INPUT_DATA_DIR = 'data/raw/'
+INPUT_DATA_DIR = 'data/cars_filtered_top300/'
 INPUT_SHAPE = (224, 224, 3)
 BATCH_SIZE = 32
-TARGET = 'make'
+TARGET = 'model'
 BASE = 'ResNet'
 
 # All available training images
@@ -33,9 +35,12 @@ files_train, files_test = train_test_split(file_paths, test_size=0.25)
 files_train, files_valid = train_test_split(files_train, test_size=0.25)
 
 # Construct tf.data.Dataset from file paths
-ds_train = construct_ds(input_files=files_train, batch_size=BATCH_SIZE, classes=classes_lower, input_size=INPUT_SHAPE)
-ds_valid = construct_ds(input_files=files_valid, batch_size=BATCH_SIZE, classes=classes_lower, input_size=INPUT_SHAPE)
-ds_test = construct_ds(input_files=files_test, batch_size=BATCH_SIZE, classes=classes_lower, input_size=INPUT_SHAPE)
+ds_train = construct_ds(input_files=files_train, batch_size=BATCH_SIZE, classes=classes_lower, input_size=INPUT_SHAPE,
+                        label_type=TARGET, shuffle=True, augment=True)
+ds_valid = construct_ds(input_files=files_valid, batch_size=BATCH_SIZE, classes=classes_lower, input_size=INPUT_SHAPE,
+                        label_type=TARGET, shuffle=False, augment=False)
+ds_test = construct_ds(input_files=files_test, batch_size=BATCH_SIZE, classes=classes_lower, input_size=INPUT_SHAPE,
+                       label_type=TARGET, shuffle=False, augment=False)
 
 # Show examples from one batch
 plot_size = (18, 18)
@@ -54,8 +59,10 @@ model.compile(loss="categorical_crossentropy",
               optimizer=Adam(0.0001),
               metrics=["categorical_accuracy"])
 
+class_weights = compute_class_weight('balanced', classes, pd.Series([file.split('_')[0] + "_" + file.split('_')[1] for file in files]))
+
 # Train model using defined tf.data.Datasets
-model.train(ds_train=ds_train, ds_valid=ds_valid, epochs=10)
+model.history = model.train(ds_train=ds_train, ds_valid=ds_valid, epochs=10, class_weights=class_weights)
 
 # Plot accuracy on training and validation data sets
 model.plot()

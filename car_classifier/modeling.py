@@ -128,7 +128,8 @@ class TransferModel:
     def train(self,
               ds_train: tf.data.Dataset,
               epochs: int,
-              ds_valid: tf.data.Dataset = None):
+              ds_valid: tf.data.Dataset = None,
+              class_weights: np.array = None):
         """
         Trains model in ds_train with for epochs rounds
 
@@ -136,6 +137,7 @@ class TransferModel:
             ds_train: training data as tf.data.Dataset
             epochs: number of epochs to train
             ds_valid: optional validation data as tf.data.Dataset
+            class_weights: optional class weights to treat unbalanced classes
 
         Returns
             Training history from self.history
@@ -153,7 +155,8 @@ class TransferModel:
         self.history = self.model.fit(ds_train,
                                       epochs=epochs,
                                       validation_data=ds_valid,
-                                      callbacks=callbacks)
+                                      callbacks=callbacks,
+                                      class_weight=class_weights)
 
         return self.history
 
