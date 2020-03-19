@@ -1,26 +1,5 @@
 ## Transfer Learning with ResNet
 
- 
-
-### Topics
-
-* Transfer Learning (general idea, quick, high-level)
-
-* ResNet introduction (architecture, history, imagenet contest)
-
-* Transfer Learning specifically for ResNet with Code
-  * Introduce Dataset
-    * Prefiltering
-    * Statistics (class histograms etc.)
-  * Data pipeline
-  * Model
-
-* What to be particularly careful about (input scale for data)
-
-
-
-### Introduction
-
 At [STATWORX](www.statworx.com), we are very passionate about the field of deep learning. In this blog series, we want to illustrate how an end-to-end deep learning project can be implemented. We use TensorFlow 2.x library for the implementation. The topics of the series include transfer learning, model deployment, building a dashboard and explainability. (COMMENT: Explainability könnte auch losgelöst in einem seperaten blogpost behandelt werden) 
 
 In the first part, we are going to show how transfer learning can be used to tackle the problem of car image classification. We start by giving a brief overview of transfer learning and the ResNet, and then go into the implementation details. The  code presented can be found in [this github repository](https://github.com/fabianmax/car-classification).
@@ -133,17 +112,13 @@ While tuning the prefiltering procedure, we observed the following:
 
 After prefiltering the images using the suggested procedure, 53'738 of originally 64'467 remain in the dataset.
 
-##### Exploring Data
+##### Data Overview
 
---> depends on which approach to take: model or make
+The prefiltered dataset contains images from 323 car models. We decided to reduce our attention to the top 300 most frequent classes in the dataset. This makes sense, since some of the least frequent classes have less than 10 representatives and can thus not be reasonably split into a train, validation and test set. Reducing the dataset to images in the top 300 classes leaves us with a dataset containing 53'536 labelled images. The class counts are distributed as follows:
 
-In this section we will give a brief overview of the data.
+<center><img src="histogram.png" title="Class count histogram" style="zoom:48%;" /></center>
 
-Number of classes
-
-Histogram
-
-Explain that only top 300 are considered
+The number of images per class (car model) ranges from 24 to slightly below 500. We can see that the dataset is very imbalanced. It is important to keep this in mind when training and evaluating the model.
 
 #### Data Pipeline: Using tf.data
 
@@ -184,7 +159,7 @@ def construct_ds(input_files: list,
     ds = ds.map(lambda x: parse_file(x, classes=classes, input_size=input_size, 																									 label_type=label_type))
 
     # Image augmentation
-    if augment:
+    if augment and tf.random.uniform((), minval=0, maxval=1, dtype=tf.dtypes.float32, 																						 seed=None, name=None) < 0.7:
         ds = ds.map(image_augment)
 
     # Batch and prefetch data
@@ -194,7 +169,7 @@ def construct_ds(input_files: list,
     return ds
 ```
 
-We will now describe the methods in the `tf.data` we used. `from_tensor_slices()` is one of the available methods for the creation of a dataset. The created dataset contains slices of the given tensor, in this case the filenames. Next, the `shuffle()` method considers `buffer_size` elements at a time and shuffles these items in isolation of the rest of the dataset. If shuffling of the complete dataset is required, `buffer_size` must be chosen larger that the number of entries in the dataset. `map()` allows to apply the function passed as the argument to the dataset. The method parse file used in the `map`() call here can be found in the [github repo](https://github.com/fabianmax/car-classification/blob/743ccd7d6b4ce67407909a028da35bd79948fb26/car_classifier/pipeline.py#L56) and is responsable for reading and resizing the images, for infering the labels from the file name and encoding the labels using a one hot encoder. Finally, the `batch()` method is used to group the dataset into batches of `batch_size` elements and the `prefetch()` method enables preparing later elements while the current element is being processed and thus improves performance. If used after a call to `batch()`, `prefetch_size` batches are prefetched.
+We will now describe the methods in the `tf.data` we used. `from_tensor_slices()` is one of the available methods for the creation of a dataset. The created dataset contains slices of the given tensor, in this case the filenames. Next, the `shuffle()` method considers `buffer_size` elements at a time and shuffles these items in isolation of the rest of the dataset. If shuffling of the complete dataset is required, `buffer_size` must be chosen larger that the number of entries in the dataset. `map()` allows to apply the function passed as the argument to the dataset. The method parse file used in the `map`() call here can be found in the [github repo](https://github.com/fabianmax/car-classification/blob/743ccd7d6b4ce67407909a028da35bd79948fb26/car_classifier/pipeline.py#L56) and is responsable for reading and resizing the images, for infering the labels from the file name and encoding the labels using a one hot encoder. If the augment flag is set, the data augmentation procedure is activated. Augmentation is only applied in 70% of the cases, since it is beneficial to also train the model on non-modified images. The augmentation techniques used in `image_augment` are flipping, brightness and contrast adjustments. Finally, the `batch()` method is used to group the dataset into batches of `batch_size` elements and the `prefetch()` method enables preparing later elements while the current element is being processed and thus improves performance. If used after a call to `batch()`, `prefetch_size` batches are prefetched.
 
 ####  Model Fine Tuning
 
@@ -352,13 +327,15 @@ Evaluating model perfomance can be done using `keras.Model'`s `evaluate` method.
 
 ##### Model Performance
 
-Using the model and approach described, we achieved...
+The model achieves slightly above 70% categorical accuracy for the task of predicting the car model for images from 300 model classes. To better understand the models predictions, it is useful to observe the confusion matrix. Below, you can see the heatmap of the model's predictions on the validation dataset.
+
+<center><img src="heatmap_v3.png" title="Class count histogram" style="zoom:48%;" /></center>
+
+We restricted the heatmap to clip the confusion matrix' entries to [0, 5], as allowing for a further span did not significantly highlight any off-diagonal region. As can be seen from the heat map, there is one class that is assigned to examples of almost all classes. This can be seen from the dark red horizontal line two thirds to the right in the figure above. Other than the class mentioned before, there are no evident biases in the predictions.
 
 ### Conclusion
 
-
-
-Lookout: Further parts of blog series (Deployment, Dashboard, Explainability)
+In this blog, we have applied transfer learning using the ResNet50V2 to classify the car model from images of cars. Our model achieves 70% categorical accuracy over 300 classes. We found unfreezing the entire base model and using a small learning rate to achieve the best results. In the next post, we will discuss how this model can be deployed using TensorFlow Serving. Stay tuned!
 
 [author class="mtl" title="Über den Autor"]
 
