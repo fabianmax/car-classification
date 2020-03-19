@@ -165,7 +165,7 @@ class TransferModel:
         # Define early stopping as callback
         early_stopping = EarlyStopping(monitor='val_loss',
                                        min_delta=0,
-                                       patience=5,
+                                       patience=7,
                                        restore_best_weights=True)
 
         callbacks = [early_stopping]
