@@ -1,8 +1,11 @@
 import re
+import os
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
+
+import pickle
 
 from tensorflow.keras.applications import ResNet50V2, VGG16
 from tensorflow.keras import Model
@@ -100,22 +103,38 @@ class TransferModel:
         Load a trained model into self.model
 
         Args:
-            path: Path to saved model
+            path: Path to directory containing saved model
 
         Returns:
             Nothing
         """
-        self.model = tf.keras.models.load_model(path)
+        if not path.endswith("/"):
+            path += "/"
 
-    def save(self, filepath: str):
+        file = open(path + "classes.pickle", 'rb')
+        self.classes = pickle.load(file)
+        self.model = tf.keras.models.load_model(path + "model")
+
+    def save(self, folderpath: str):
         """
         Save the model using tf.keras.model.save
 
         Args:
             filepath: (Full) Filepath to store model
         """
+
+        # Make sure folderpath ends on slash, else fix
+        if not folderpath.endswith("/"):
+            folderpath += "/"
+
         if self.model is not None:
-            self.model.save(filepath=filepath)
+            os.mkdir(folderpath)
+            model_path = folderpath + "model"
+            # Save model to model dir
+            self.model.save(filepath=model_path)
+            # Save associated class mapping
+            class_df = pd.DataFrame({'classes': self.classes})
+            class_df.to_pickle(folderpath + "classes.pickle")
         else:
             raise AttributeError('Model does not exist')
 
@@ -146,7 +165,7 @@ class TransferModel:
         # Define early stopping as callback
         early_stopping = EarlyStopping(monitor='val_loss',
                                        min_delta=0,
-                                       patience=10,
+                                       patience=5,
                                        restore_best_weights=True)
 
         callbacks = [early_stopping]
