@@ -285,13 +285,13 @@ def predict(self, ds_new: tf.data.Dataset, proba: bool = True):
         return [np.argmax(x) for x in p]
 ```
 
- It is important that the dataset `ds_new` is not shuffled, else the predictions obtained will be misaligned with the images obtained when iterating over the dataset a second time. This is the case since the flag `reshuffle_each_iteration` is true by default in the `shuffle` method's implementation. A further important fact is that the `take` method is a generator object. This is important when you want to check out predictions e.g. for only one batch. The following code snippet illustrates the arising problem. `show_batch_with_pred` is a function that plot the images in `ds_batch` annotated with the predictions in `predictions`. 
+ It is important that the dataset `ds_new` is not shuffled, else the predictions obtained will be misaligned with the images obtained when iterating over the dataset a second time. This is the case since the flag `reshuffle_each_iteration` is true by default in the `shuffle` method's implementation. A further effect of shuffling is that multiple calls to the `take` method will not return the same data. This is important when you want to check out predictions e.g. for only one batch. The following code snippet illustrates the arising problem. `show_batch_with_pred` is a function that plot the images in `ds_batch` annotated with the predictions in `predictions`. 
 
 ```python
 # Use construct_ds method from above to create dataset
 ds = construct_ds(...)
 
-# Take 1 batch of dataset: This creates a generator!
+# Take 1 batch of dataset: This returns a new dataset containing 1 batch
 ds_batch = ds.take(1)
 
 # Predict labels for one batch
@@ -302,7 +302,7 @@ predictions = model.predict(ds_batch)
 show_batch_with_pred(ds_batch, predictions)
 ```
 
-The predictions will **not** match the plotted images, since `ds_batch` is a generator and the second call to it will yield the next batch in the dataset `ds`. Thus for the object name to be aligned with its functionality, we would have to rename `ds_batch` to `ds_get_batch`. A function to plot images annotated with the corresponding predictions could look as follows:
+The predictions will in general **not** match the plotted images, since `ds_batch` is a Dataset object and the second call to it will yield shuffled data if the original Dataset uses `shuffle`. A function to plot images annotated with the corresponding predictions could look as follows:
 
 ```python
 def show_batch_with_pred(model, ds, classes, rescale=True, size=(10, 10), title=None):
