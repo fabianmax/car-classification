@@ -9,11 +9,14 @@ The series was originally inspired by this [reddit post](https://www.reddit.com/
 In this blog, we have applied transfer learning using the ResNet50V2 to classify the car model from images of cars. Our model achieves 70% categorical accuracy over 300 classes. We found unfreezing the entire base model and using a small learning rate to achieve the best results.
 
 Link to full blog post on STATWORX.com (coming soon)
-[Link to full blog post in this repo](https://github.com/fabianmax/car-classification/blob/master/blog/Transfer%20Learning%20with%20ResNet.md)
+[Link to full blog post in this repo](https://github.com/fabianmax/car-classification/blob/master/blog/Blog_Part_1_Transfer_Learning_with_ResNet.md)
 
 ## Part 2: Deployment of Deep Learning Models with TensorFlow Serving
 
-*comming soon...*
+In this blog post, we have served a TensorFlow model for image recognition using TensorFlow Serving. To do so, we first saved the model using the SavedModel format. Next, we started the TensorFlow Serving server in a Docker container. Finally, we showed how to request predictions from the model using the API endpoints and a correct specified request body.
+
+Link to full blog post on STATWORX.com (coming soon)
+[Link to full blog post in this repo](https://github.com/fabianmax/car-classification/blob/master/blog/Blog_Part_2_Deploying_TensorFlow_Models_in_Docker_using_TensorFlow_Serving.md)
 
 ## Part 3: Interpretability of Deep Learning Models with Grad-CAM
 
