@@ -1,24 +1,36 @@
 ## Transfer Learning with ResNet
 
-At [STATWORX](www.statworx.com), we are very passionate about the field of deep learning. In this blog series, we want to illustrate how an end-to-end deep learning project can be implemented. We use TensorFlow 2.x library for the implementation. The topics of the series include transfer learning, model deployment, building a dashboard and explainability. (COMMENT: Explainability könnte auch losgelöst in einem seperaten blogpost behandelt werden) 
+At [STATWORX](www.statworx.com), we are very passionate about the field of deep learning. In this blog series, we want to illustrate how an end-to-end deep learning project can be implemented. We use TensorFlow 2.x library for the implementation. The topics of the series include transfer learning for computer vision, model deployment via TensorFlow Serving, integrating the model into a Dash dashboard and interpretability of deep learning models via Grad-CAM.
 
-In the first part, we are going to show how transfer learning can be used to tackle the problem of car image classification. We start by giving a brief overview of transfer learning and the ResNet, and then go into the implementation details. The  code presented can be found in [this github repository](https://github.com/fabianmax/car-classification).
+In the first part, we are going to show how transfer learning can be used to tackle the problem of car image classification. We start by giving a brief overview of transfer learning and the ResNet, and then go into the implementation details. The code presented can be found in [this github repository](https://github.com/fabianmax/car-classification).
 
 ### Transfer Learning
 
-Transfer learning is a useful approach when one is faced with the problem of too little available training data. Networks pretrained for a similar problem can be used as a starting point for training new models. The pretrained models are referred to as base models. In our example, a network trained on the [ImageNet](http://www.image-net.org/) dataset can be used as the starting point for building a car model classifier. The main idea behind transfer learning is that the first layers of a network are used to extract important high-level features, which remain similar for the kind of data treated. The final layers (also known as the head) of the original network are replaced by a custom head suitable for the problem at hand. The weights in the head are initialized randomly and the resulting network can be trained for the specific task. There are various ways in which the base model can be treated during training. In a first step, its weights can be fixed. If the learning progress suggests the model not being flexible enough, certain layers or the entire base model can be "unfreezed" and thus made trainable. A further important aspect to note is that the input must be of the same dimensionality as the data the model was trained on, if the first layers of the base model are not modified.
+In traditional (machine) learning, we develop a model and train it on new data for every new task at hand. Transfer learning differes from this approach in that knowledge is transfered from one task to another. It is a useful approach when one is faced with the problem of too little available training data. Models pretrained for a similar problem can be used as a starting point for training new models. The pretrained models are referred to as base models. 
+
+In our example, a deep learning model trained on the [ImageNet](http://www.image-net.org/) dataset can be used as the starting point for building a car model classifier. The main idea behind transfer learning for deep learning models is that the first layers of a network are used to extract important high-level features, which remain similar for the kind of data treated. The final layers (also known as the head) of the original network are replaced by a custom head suitable for the problem at hand. The weights in the head are initialized randomly and the resulting network can be trained for the specific task. 
+
+There are various ways in which the base model can be treated during training. In a first step, its weights can be fixed. If the learning progress suggests the model not being flexible enough, certain layers or the entire base model can be "unfreezed" and thus made trainable. A further important aspect to note is that the input must be of the same dimensionality as the data the model was trained on, if the first layers of the base model are not modified.
+
+
+
+<img src="transfer_learning.png" alt="image-20200319174208670" style="zoom:75%;" />
+
+
 
 We will next give a brief introduction to the ResNet, a popular and powerful CNN-architecture for image data. Then, we will show how we used transfer learning with ResNet to do car model classifiaction.
 
 ### ResNet
 
-The ResNet is a CNN network that is based on the residual block. It enables training deep networks by countering the vanishing gradient problem. In the residual block depicted in the right figure below, the unmodified input is passed on to the next layer by adding it to a layer's output. This modification makes sure that information flow from the input to the deeper layers is possible. The ResNet architechture is depicted in the right network in the left figure below. It is plotted alongside a plain CNN and the VGG-19 network, another standard CNN architecture.
+Training deep neural networks can quickly become challenging due to the so called vanishing gradient problem. But what do we mean with vanishing gradients? Neural networks are commonly trained using back-propagation. This algorithms leverages the chain rule of calculus to derive gradients at a deeper layers of the network by multiplying with gradients from earlier layers. Since gradients get repeatedly multiplied in deep networks, during back-propagation, they can quickly approach infinitely small values.
+
+[ResNet](https://arxiv.org/abs/1512.03385) is a CNN network that solves the vanishing gradient problem with so-called residual blocks (you find a good explanation why it is called 'residual' [here](https://towardsdatascience.com/residual-blocks-building-blocks-of-resnet-fd90ca15d6ec)). In the residual block the unmodified input is passed on to the next layer by adding it to a layer's output (see fight figure). This modification makes sure that a better information flow from the input to the deeper layers is possible. The entire ResNet architechture is depicted in the right network in the left figure below. It is plotted alongside a plain CNN and the VGG-19 network, another standard CNN architecture.
 
 <center><img src="resnet-architecture-3.png" alt="Residual_Block" style="zoom:25%;"/> <img src="Residual_Block.png" alt="Residual_Block" style="zoom:15%;"/></center>
 
-The ResNet has proved to be a very powerful network architecture for image classification problems. For example, an ensemble of ResNets with 152 layers won the ILSVRC 2015 image classification contest. Pretrained ResNet models of different sizes exist in the `tensorflow.keras.application` module, namely ResNet50, ResNet101, ResNet152 and their corresponing second versions (ResNet50V2, ...). The number following the model name denotes the number of layers the networks have. The available weights are pretrained on the ImageNet dataset. The models were trained on large computing clusters using hardware accelerators for significant time periods. Transfer learning thus enables us to leverage these training results by using the obtained weights as a starting point.
+ResNet has proved to be a very powerful network architecture for image classification problems. For example, an ensemble of ResNets with 152 layers won the ILSVRC 2015 image classification contest. Pretrained ResNet models of different sizes are available in the `tensorflow.keras.application` module, namely ResNet50, ResNet101, ResNet152 and their corresponing second versions (ResNet50V2, ...). The number following the model name denotes the number of layers the networks have. The available weights are pretrained on the ImageNet dataset. The models were trained on large computing clusters using hardware accelerators for significant time periods. Transfer learning thus enables us to leverage these training results by using the obtained weights as a starting point.
 
-### Classifying Car Model
+### Classifying Car Models
 
 As an illustrative example of how transfer learning can be applied, we treat the problem of classifying the car model given an image of the car. We will start by describing the dataset set we used and how we can filter out unwanted examples in the dataset. Next, we will go over how a data pipeline can be setup using `tensorflow.data`. In the second section, we will talk you through the model implementation and point out what aspects to be particularly careful about during training and prediction.
 
@@ -36,13 +48,13 @@ Thus, it is beneficial to additionally prefilter the data to clean out more of t
 
 ##### Prefiltering
 
-There are multiple approaches to filter non-car images out of the dataset:
+There are multiple possible approaches to filter non-car images out of the dataset:
 
 1. Use a pretrained model
 2. Train another model to classify car/no-car
-3. Train a generative network on a car dataset and use the discriminator
+3. Train a generative network on a car dataset and use the discriminator part of the network
 
-We decided to pursue the first approach since it is the most direct and very good pretrained models exist. If one wanted to pursue the second or third approach, one could e.g. use [this](https://ai.stanford.edu/~jkrause/cars/car_dataset.html) dataset to train the model. The referred dataset only contains images of cars but is significantly smaller than the dataset we used.
+We decided to pursue the first approach since it is the most direct one and very good pretrained models are easily available. If one wanted to pursue the second or third approach, one could e.g. use [this](https://ai.stanford.edu/~jkrause/cars/car_dataset.html) dataset to train the model. The referred dataset only contains images of cars but is significantly smaller than the dataset we used.
 
 We chose the ResNet50V2 in the `tensorflow.keras.applications` module with the pretrained "imagenet" weights. In a first step, we must figure out the indices and classnames of the imagenet labels corresponding to car images.
 
@@ -61,7 +73,7 @@ from tensorflow.keras.applications import ResNet50V2
 model = ResNet50V2(weights='imagenet')
 ```
 
-We can then use this model to make predictions for images. It is essential that the images fed to the prediction method are scaled identically to the images used for training.  The different **ResNet models** are trained on different input scales. It is thus essential to apply the correct image preprocessing. The module `keras.application.resnet_v2` contains the method `preprocess_input` which should be used when using a ResNetV2 network. This method expects the image arrays to be of type float and have values in **[0, 255]**. Using the appropriately pre-processed input, we can then use the built-in predict method to obtain predictions given an image stored at `filepath`:
+We can then use this model to make predictions for images. It is essential that the images fed to the prediction method are scaled identically to the images used for training. The different **ResNet models** are trained on different input scales. It is thus essential to apply the correct image preprocessing. The module `keras.application.resnet_v2` contains the method `preprocess_input` which should be used when using a ResNetV2 network. This method expects the image arrays to be of type float and have values in **[0, 255]**. Using the appropriately pre-processed input, we can then use the built-in predict method to obtain predictions given an image stored at `filepath`:
 
 ```python
 from tensorflow.keras.applications.resnet_v2 import preprocess_input
@@ -122,7 +134,11 @@ The number of images per class (car model) ranges from 24 to slightly below 500.
 
 #### Data Pipeline: Using tf.data
 
-`tf.data` allows creating elegant input pipelines. The `tf.data.Dataset` is an API for writing efficient data pipelines. The API contains many general methods which can be applied to load and transform potentially large datasets.
+Even after pre-filtering and reducing to top 300 classes, we still have a lot of images left. This poses a potential problem, since we can not simply load all images into the memory of our GPU at once. To tackle this problem, we will use `tf.data`. 
+
+`tf.data` and especially the `tf.data.Dataset` API allows creating elegant and at the same time very efficient input pipelines. The API contains many general methods which can be applied to load and transform potentially large datasets. `tf.data.Dataset` is especifically useful when training models on GPU(s). It allows for data loading from the HDD, applies transformation on-the-fly, and creates batches that are than sent to the GPU. And this is all done in a way such as the GPU never has to wait for new data.
+
+The following functions creates a `tf.data.Dataset` instance for our particular problem:
 
 ```python
 def construct_ds(input_files: list,
@@ -169,11 +185,16 @@ def construct_ds(input_files: list,
     return ds
 ```
 
-We will now describe the methods in the `tf.data` we used. `from_tensor_slices()` is one of the available methods for the creation of a dataset. The created dataset contains slices of the given tensor, in this case the filenames. Next, the `shuffle()` method considers `buffer_size` elements at a time and shuffles these items in isolation of the rest of the dataset. If shuffling of the complete dataset is required, `buffer_size` must be chosen larger that the number of entries in the dataset. `map()` allows to apply the function passed as the argument to the dataset. The method parse file used in the `map`() call here can be found in the [github repo](https://github.com/fabianmax/car-classification/blob/743ccd7d6b4ce67407909a028da35bd79948fb26/car_classifier/pipeline.py#L56) and is responsable for reading and resizing the images, for infering the labels from the file name and encoding the labels using a one hot encoder. If the augment flag is set, the data augmentation procedure is activated. Augmentation is only applied in 70% of the cases, since it is beneficial to also train the model on non-modified images. The augmentation techniques used in `image_augment` are flipping, brightness and contrast adjustments. Finally, the `batch()` method is used to group the dataset into batches of `batch_size` elements and the `prefetch()` method enables preparing later elements while the current element is being processed and thus improves performance. If used after a call to `batch()`, `prefetch_size` batches are prefetched.
+We will now describe the methods in the `tf.data` we used:
+
+-  `from_tensor_slices()` is one of the available methods for the creation of a dataset. The created dataset contains slices of the given tensor, in this case the filenames. 
+- Next, the `shuffle()` method considers `buffer_size` elements at a time and shuffles these items in isolation of the rest of the dataset. If shuffling of the complete dataset is required, `buffer_size` must be chosen larger that the number of entries in the dataset. 
+- `map()` allows to apply arbitrary function to the dataset. We created a function `parse_file()` that can be found  in the [github repo](https://github.com/fabianmax/car-classification/blob/743ccd7d6b4ce67407909a028da35bd79948fb26/car_classifier/pipeline.py#L56). It is responsable for reading and resizing the images, for infering the labels from the file name and encoding the labels using a one hot encoder. If the augment flag is set, the data augmentation procedure is activated. Augmentation is only applied in 70% of the cases, since it is beneficial to also train the model on non-modified images. The augmentation techniques used in `image_augment` are flipping, brightness and contrast adjustments. 
+- Finally, the `batch()` method is used to group the dataset into batches of `batch_size` elements and the `prefetch()` method enables preparing later elements while the current element is being processed and thus improves performance. If used after a call to `batch()`, `prefetch_size` batches are prefetched.
 
 ####  Model Fine Tuning
 
-Below you can see the code that can be used to instantiate a model based on the pretrained ResNet. 
+Having defined our input pipeline, we now turn towards the model training part. Below you can see the code that can be used to instantiate a model based on the pretrained ResNet, which is available in `tf.keras.applications`: 
 
 ```python
 from tensorflow.keras.applications import ResNet50V2
@@ -201,21 +222,46 @@ class TransferModel:
                                      input_shape=self.shape,
                                      weights='imagenet')
 
+        # Allow parameter updates for all layers
         self.base_model.trainable = True
         
+        # Add a new pooling layer on the original output
         add_to_base = self.base_model.output
         add_to_base = GlobalAveragePooling2D(data_format='channels_last', name='head_gap')													(add_to_base)
 
-        # Add final output layer
+        # Add new output layer as head
         new_output = Dense(len(self.classes), activation='softmax', name='head_pred')															 (add_to_base)
+        
+        # Define model
         self.model = Model(self.base_model.input, new_output)
 ```
 
-The full version of the code on github also contains the option to replace the base model by a VGG16 network, another standard CNN for image classification. In the full version, it is also possible to unfreeze certain layers, meaning we can make the corresponding parameters trainable while leaving the others fixed. As a default, we have made all parameters trainable here.
+A few more details on the code above:
 
-The TransferModel contains information about the used input shape, the different class labels and also holds the base model and model instances. When using the base model without modification, we must use the same input shape as the one it was originally trained on. When using a pretrained ResNet for another problem that it was initially trained for, we must replace the head of the network. Setting the flag `include_top` to `False` when creating the ResNet allows us to specify that the original head should not be included in the model. We can then add a custom head. We did this here by adding a pooling layer and a dense layer with the required output dimensionality.
+- We first create a instance of class `tf.keras.applications.ResNet50V2`. With `include_top=False` we tell the pretrained model to leave out the original head of the model (in this case the classification of 1000 classes on ImageNet).
+- `base_model.trainable = True` makes all layers trainable.
+- Using `tf.keras` functional API, we than stack a new pooling layer on top of the last convolution block of the original ResNet model. This is a nesessary intermediate step before feeding the output to the finale classification layer.
+- The final classification layer is than defined using `tf.keras.layers.Dense`. We define the number of neurons to be equal to the number of desired classes. And the softmax activation function makes sure that the output is a pseudo probaility in the range of `(0,1]` .
 
-Next, we will look at the training procedure. `train` is a class method of the class `TransferModel` introduced above.
+The full version of `TransferModel` (see [github](https://github.com/fabianmax/car-classification/blob/master/car_classifier/modeling.py)) also contains the option to replace the base model by a VGG16 network, another standard CNN for image classification. In addition, it is also allows to unfreeze only certain layers, meaning we can make the corresponding parameters trainable while leaving the others fixed. As a default, we have made all parameters trainable here.
+
+After we defined the model, we need to configure it for training. This can be done using `tf.keras.Model`'s  `compile()`-method:
+
+```python
+def compile(self, **kwargs):
+  	"""
+    Compile method
+    """
+    self.model.compile(**kwargs)
+```
+
+We than pass the following  keyword arguments to our method:
+
+- `loss = "categorical_crossentropy"`for multi-class classification, 
+- `optimizer = Adam(0.0001)` for using the Adam optimizer from `tf.keras.optimizers` with a rather small learning rate (more on the learning rate below), and
+- `metrics = ["categorical_accuracy"]` for training and validation monitoring. 
+
+Next, we will look at the training procedure. Therefore we define a `train`-method for our  `TransferModel`-class introduced above:
 
 ```python
 from tensorflow.keras.callbacks import EarlyStopping
@@ -256,7 +302,7 @@ def train(self,
 
 As our model is an instance of `tensorflow.keras.Model`, we can train it using the `fit` method. To prevent overfitting, early stopping is used by passing it to the fit method as a callback function. The patience parameter can be tuned to specify how soon early stopping should apply. The parameter stands for the number of epochs after which, if no decrease of the validation loss is registered, the training will be interrupted.
 
-We can describe the training process using a pretrained model as follows: As the weights in the head are initialized randomly and the weights of the base model are pretrained, the training composes of training the head from scratch and fine tuning the pretrained model's weights. It is important to use a small learning rate (e.g. 1e-4) since choosing the learning rate too large can destroy the near optimal pretrained weights of the base model.
+We can describe the training process using a pretrained model as follows: As the weights in the head are initialized randomly and the weights of the base model are pretrained, the training composes of training the head from scratch and fine tuning the pretrained model's weights. It is recommended to use a small learning rate (e.g. 1e-4) since choosing the learning rate too large can destroy the near optimal pretrained weights of the base model.
 
 The training procedure can be sped up by first training for a few epochs without the base model being trainable. The purpose of these initial epochs is to adapt the heads' weights to the problem. This speeds up the training since when training only the head, much fewer parameters are trainable and thus updated for every batch. The resulting model weights can then be used as the starting point to train the entire model with the base model being trainable. For the car classification problem we are considering here, applying this two stage training however did not achieve notable performance enhancement.
 
@@ -268,6 +314,7 @@ When using the `tf.data.Dataset` API, one must pay attention to the nature of th
 def predict(self, ds_new: tf.data.Dataset, proba: bool = True):
     """
     Predict class probs or labels on ds_new
+    Labels are obtained by taking the most likely class given the predicted probs
 
     Args:
         ds_new: New data as tf.data.Dataset
@@ -285,13 +332,13 @@ def predict(self, ds_new: tf.data.Dataset, proba: bool = True):
         return [np.argmax(x) for x in p]
 ```
 
- It is important that the dataset `ds_new` is not shuffled, else the predictions obtained will be misaligned with the images obtained when iterating over the dataset a second time. This is the case since the flag `reshuffle_each_iteration` is true by default in the `shuffle` method's implementation. A further important fact is that the `take` method is a generator object. This is important when you want to check out predictions e.g. for only one batch. The following code snippet illustrates the arising problem. `show_batch_with_pred` is a function that plot the images in `ds_batch` annotated with the predictions in `predictions`. 
+ It is important that the dataset `ds_new` is not shuffled, else the predictions obtained will be misaligned with the images obtained when iterating over the dataset a second time. This is the case since the flag `reshuffle_each_iteration` is true by default in the `shuffle` method's implementation. A further important fact is that the `take` method is a generator object. This is important when you want to check out predictions e.g. for only one batch. The following code snippet illustrates the arising problem. `show_batch_with_pred` is a function that plots the images in `ds_batch` annotated with the predictions in `predictions`. 
 
 ```python
-# Use construct_ds method from above to create dataset
+# Use construct_ds method from above to create a dataset
 ds = construct_ds(...)
 
-# Take 1 batch of dataset: This creates a generator!
+# Take one batch (e.g. 32 images) from the dataset: This creates a python generator!
 ds_batch = ds.take(1)
 
 # Predict labels for one batch

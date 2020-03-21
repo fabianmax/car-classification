@@ -76,7 +76,7 @@ weights = tf.reduce_mean(guided_grads, axis=(0, 1))
 
 # Class activation map (cam)
 # Multiply values of conv filters with gradient weights
-cam = np.ones(output.shape[0: 2], dtype = np.float32)
+cam = np.ones(output.shape[0: 2], dtype=np.float32)
 for i, w in enumerate(weights):
     cam += w * output[:, :, i]
 

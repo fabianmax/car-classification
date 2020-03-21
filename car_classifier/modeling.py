@@ -120,7 +120,7 @@ class TransferModel:
         Save the model using tf.keras.model.save
 
         Args:
-            filepath: (Full) Filepath to store model
+            folderpath: (Full) Filepath to store model
         """
 
         # Make sure folderpath ends on slash, else fix
@@ -200,6 +200,8 @@ class TransferModel:
     def predict(self, ds_new: tf.data.Dataset, proba: bool = True):
         """
         Predict class probs or labels on ds_new
+        Labels are obtained by taking the most likely class given the predicted probs
+
 
         Args:
             ds_new: New data as tf.data.Dataset
