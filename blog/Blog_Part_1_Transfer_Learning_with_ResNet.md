@@ -382,7 +382,7 @@ We restricted the heatmap to clip the confusion matrix' entries to [0, 5], as al
 
 ### Conclusion
 
-In this blog, we have applied transfer learning using the ResNet50V2 to classify the car model from images of cars. Our model achieves 70% categorical accuracy over 300 classes. We found unfreezing the entire base model and using a small learning rate to achieve the best results. In the next post, we will discuss how this model can be deployed using TensorFlow Serving. Stay tuned!
+In this blog post, we have applied transfer learning using the ResNet50V2 to classify the car model from images of cars. Our model achieves 70% categorical accuracy over 300 classes. We found unfreezing the entire base model and using a small learning rate to achieve the best results. In the next post, we will discuss how this model can be deployed using TensorFlow Serving. Stay tuned!
 
 [author class="mtl" title="Über den Autor"]
 

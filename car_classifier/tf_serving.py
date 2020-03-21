@@ -68,7 +68,7 @@ path = sample(file_paths, 1)[0]
 parts = path.split('/')[-1]
 label = parts.split('_')[0] + "_" + parts.split('_')[1]
 
-# Prepare image
+# Load image
 img = image.load_img(path, target_size=(224, 224))
 img = image.img_to_array(img)
 
@@ -83,10 +83,12 @@ img = preprocess_input(img)
 img = img.reshape(-1, *img.shape)
 
 # Send data as list to TF serving via json dump
-data = json.dumps({"signature_name": "serving_default", "instances": img.tolist()})
-headers = {"content-type": "application/json"}
-json_response = requests.post('http://localhost:8501/v1/models/resnet_unfreeze_all_filtered:predict', data=data, headers=headers)
-predictions = json.loads(json_response.text)['predictions']
+request_url = 'http://localhost:8501/v1/models/resnet_unfreeze_all_filtered:predict'
+request_body = json.dumps({"signature_name": "serving_default", "instances": img.tolist()})
+request_headers = {"content-type": "application/json"}
+json_response = requests.post(request_url, data=request_body, headers=request_headers)
+response_body = json.loads(json_response.text)
+predictions = response_body['predictions']
 
 # Get label from prediction
 y_hat_idx = np.argmax(predictions)
