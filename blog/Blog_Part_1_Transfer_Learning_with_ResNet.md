@@ -148,6 +148,7 @@ def construct_ds(input_files: list,
                  input_size: tuple = (212, 320),
                  prefetch_size: int = 10,
                  shuffle_size: int = 32,
+                 shuffle: bool = True,
                  augment: bool = False):
     """
     Function to construct a tf.data.Dataset set from list of files
@@ -159,6 +160,7 @@ def construct_ds(input_files: list,
         input_size: size of images (output size)
         prefetch_size: buffer size (number of batches to prefetch)
         shuffle_size: shuffle size (size of buffer to shuffle from)
+        shuffle: boolean specifying whether to shuffle dataset
         augment: boolean if image augmentation should be applied
         label_type: 'make' or 'model'
 
@@ -169,7 +171,8 @@ def construct_ds(input_files: list,
     ds = tf.data.Dataset.from_tensor_slices(input_files)
 
     # Shuffle files
-    ds = ds.shuffle(buffer_size=shuffle_size)
+    if shuffle:
+        ds = ds.shuffle(buffer_size=shuffle_size)
 
     # Load image/labels
     ds = ds.map(lambda x: parse_file(x, classes=classes, input_size=input_size, 																									 label_type=label_type))
@@ -188,7 +191,7 @@ def construct_ds(input_files: list,
 We will now describe the methods in the `tf.data` we used:
 
 -  `from_tensor_slices()` is one of the available methods for the creation of a dataset. The created dataset contains slices of the given tensor, in this case the filenames. 
-- Next, the `shuffle()` method considers `buffer_size` elements at a time and shuffles these items in isolation of the rest of the dataset. If shuffling of the complete dataset is required, `buffer_size` must be chosen larger that the number of entries in the dataset. 
+- Next, the `shuffle()` method considers `buffer_size` elements at a time and shuffles these items in isolation of the rest of the dataset. If shuffling of the complete dataset is required, `buffer_size` must be chosen larger that the number of entries in the dataset. Shuffling is only performed if `shuffle=True`.
 - `map()` allows to apply arbitrary function to the dataset. We created a function `parse_file()` that can be found  in the [github repo](https://github.com/fabianmax/car-classification/blob/743ccd7d6b4ce67407909a028da35bd79948fb26/car_classifier/pipeline.py#L56). It is responsable for reading and resizing the images, for infering the labels from the file name and encoding the labels using a one hot encoder. If the augment flag is set, the data augmentation procedure is activated. Augmentation is only applied in 70% of the cases, since it is beneficial to also train the model on non-modified images. The augmentation techniques used in `image_augment` are flipping, brightness and contrast adjustments. 
 - Finally, the `batch()` method is used to group the dataset into batches of `batch_size` elements and the `prefetch()` method enables preparing later elements while the current element is being processed and thus improves performance. If used after a call to `batch()`, `prefetch_size` batches are prefetched.
 
@@ -306,7 +309,7 @@ We can describe the training process using a pretrained model as follows: As the
 
 The training procedure can be sped up by first training for a few epochs without the base model being trainable. The purpose of these initial epochs is to adapt the heads' weights to the problem. This speeds up the training since when training only the head, much fewer parameters are trainable and thus updated for every batch. The resulting model weights can then be used as the starting point to train the entire model with the base model being trainable. For the car classification problem we are considering here, applying this two stage training however did not achieve notable performance enhancement.
 
-#### Evalution/Prediction
+#### Evaluation/Prediction
 
 When using the `tf.data.Dataset` API, one must pay attention to the nature of the methods used. The following method in our `TransferModel` class can be used as a prediction method.
 
@@ -332,11 +335,11 @@ def predict(self, ds_new: tf.data.Dataset, proba: bool = True):
         return [np.argmax(x) for x in p]
 ```
 
-It is important that the dataset `ds_new` is not shuffled, else the predictions obtained will be misaligned with the images obtained when iterating over the dataset a second time. This is the case since the flag `reshuffle_each_iteration` is true by default in the `shuffle` method's implementation. A further effect of shuffling is that multiple calls to the `take` method will not return the same data. This is important when you want to check out predictions e.g. for only one batch. The following code snippet illustrates the arising problem. `show_batch_with_pred` is a function that plot the images in `ds_batch` annotated with the predictions in `predictions`. 
+It is important that the dataset `ds_new` is not shuffled, else the predictions obtained will be misaligned with the images obtained when iterating over the dataset a second time. This is the case since the flag `reshuffle_each_iteration` is true by default in the `shuffle` method's implementation. A further effect of shuffling is that multiple calls to the `take` method will not return the same data. This is important when you want to check out predictions e.g. for only one batch. A simple example where this can be seen is:
 
 ```python
-# Use construct_ds method from above to create a dataset
-ds = construct_ds(...)
+# Use construct_ds method from above to create a shuffled dataset
+ds = construct_ds(..., shuffle=True)
 
 # Take 1 batch (e.g. 32 images) of dataset: This returns a new dataset
 ds_batch = ds.take(1)
@@ -344,12 +347,11 @@ ds_batch = ds.take(1)
 # Predict labels for one batch
 predictions = model.predict(ds_batch)
 
-# Plot a batch of images with predictions: The next batch will
-# be plotted, not the one we made predictions on!
-show_batch_with_pred(ds_batch, predictions)
+# Predict labels again: The result will not be the same as predictions above due to shuffling
+predictions_2 = model.predict(ds_batch)
 ```
 
-The predictions will in general **not** match the plotted images, since `ds_batch` is a Dataset object and the second call to it will yield shuffled data if the original Dataset uses `shuffle`. A function to plot images annotated with the corresponding predictions could look as follows:
+A function to plot images annotated with the corresponding predictions could look as follows:
 
 ```python
 def show_batch_with_pred(model, ds, classes, rescale=True, size=(10, 10), title=None):
@@ -357,7 +359,7 @@ def show_batch_with_pred(model, ds, classes, rescale=True, size=(10, 10), title=
         image_array = image.numpy()
         label_array = label.numpy()
         batch_size = image_array.shape[0]
-        pred = model.predict(ds1, proba=False)
+        pred = model.predict(image, proba=False)
         for idx in range(batch_size):
             label = classes[np.argmax(label_array[idx])]
             ax = plt.subplot(np.ceil(batch_size / 4), 4, idx + 1)
@@ -369,6 +371,8 @@ def show_batch_with_pred(model, ds, classes, rescale=True, size=(10, 10), title=
                       + "prediction: " + classes[pred[idx]], fontsize=10)
             plt.axis('off')
 ```
+
+The `show_batch_with_pred` method works for shuffled datasets as well, since `image` and `label` correspond to the same call to the `take` method.
 
 Evaluating model perfomance can be done using `keras.Model'`s `evaluate` method.
 
