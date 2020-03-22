@@ -24,7 +24,7 @@ We will next give a brief introduction to the ResNet, a popular and powerful CNN
 
 Training deep neural networks can quickly become challenging due to the so called vanishing gradient problem. But what do we mean with vanishing gradients? Neural networks are commonly trained using back-propagation. This algorithms leverages the chain rule of calculus to derive gradients at a deeper layers of the network by multiplying with gradients from earlier layers. Since gradients get repeatedly multiplied in deep networks, during back-propagation, they can quickly approach infinitesimally small values.
 
-[ResNet](https://arxiv.org/abs/1512.03385) is a CNN network that solves the vanishing gradient problem with so-called residual blocks (you find a good explanation why it is called 'residual' [here](https://towardsdatascience.com/residual-blocks-building-blocks-of-resnet-fd90ca15d6ec)). In the residual block the unmodified input is passed on to the next layer by adding it to a layer's output (see fight figure). This modification makes sure that a better information flow from the input to the deeper layers is possible. The entire ResNet architechture is depicted in the right network in the left figure below. It is plotted alongside a plain CNN and the VGG-19 network, another standard CNN architecture.
+[ResNet](https://arxiv.org/abs/1512.03385) is a CNN network that solves the vanishing gradient problem with so-called residual blocks (you find a good explanation why it is called 'residual' [here](https://towardsdatascience.com/residual-blocks-building-blocks-of-resnet-fd90ca15d6ec)). In the residual block the unmodified input is passed on to the next layer by adding it to a layer's output (see right figure). This modification makes sure that a better information flow from the input to the deeper layers is possible. The entire ResNet architechture is depicted in the right network in the left figure below. It is plotted alongside a plain CNN and the VGG-19 network, another standard CNN architecture.
 
 <center><img src="resnet-architecture-3.png" alt="Residual_Block" style="zoom:25%;"/> <img src="Residual_Block.png" alt="Residual_Block" style="zoom:15%;"/></center>
 
@@ -36,7 +36,7 @@ As an illustrative example of how transfer learning can be applied, we treat the
 
 #### Data
 
-We used the dataset described in and downloadable from [this github repo](https://github.com/nicolas-gervais/predicting-car-price-from-scraped-data/tree/master/picture-scraper). The author built a datascraper to scrape all car images from the [carconnection website](www.thecarconnection.com). He describes that a lot of images are car interior images. As they are not wanted in the dataset, they are filtered out based on pixel color. The dataset contains 64'467 jpg-images, where the file names contain information on the car's make, model, build year, etc. For a more detailed insight on the dataset, we recommend you consult the original [github repo](https://github.com/nicolas-gervais/predicting-car-price-from-scraped-data/tree/master/picture-scraper). Three sample images are shown below.
+We used the dataset described in and downloadable from [this github repo](https://github.com/nicolas-gervais/predicting-car-price-from-scraped-data/tree/master/picture-scraper). The author built a datascraper to scrape all car images from the [carconnection website](https://www.thecarconnection.com/). He describes that a lot of images are car interior images. As they are not wanted in the dataset, they are filtered out based on pixel color. The dataset contains 64'467 jpg-images, where the file names contain information on the car's make, model, build year, etc. For a more detailed insight on the dataset, we recommend you consult the original [github repo](https://github.com/nicolas-gervais/predicting-car-price-from-scraped-data/tree/master/picture-scraper). Three sample images are shown below.
 
 <center><img src="BMW_2-Series_2014_32_17_240_20_4_69_55_174_23_RWD_4_2_2dr_OGt.jpg" title="BMW" style="zoom:78%;" /> <img src="Mercedes-Benz_A Class_2020_34_17_180_20_4_70_56_179_24_AWD_5_4_4dr_enw.jpg" title="Mercedes" style="zoom:78%;" /> <img src="Porsche_718_2017_56_18_300_20_4_70_50_172_21_RWD_2_2_Convertible_fgt.jpg" title="Porsche" style="zoom:78%;" /></center>
 
@@ -73,7 +73,7 @@ from tensorflow.keras.applications import ResNet50V2
 model = ResNet50V2(weights='imagenet')
 ```
 
-We can then use this model to make predictions for images. It is essential that the images fed to the prediction method are scaled identically to the images used for training. The different **ResNet models** are trained on different input scales. It is thus essential to apply the correct image preprocessing. The module `keras.application.resnet_v2` contains the method `preprocess_input` which should be used when using a ResNetV2 network. This method expects the image arrays to be of type float and have values in **[0, 255]**. Using the appropriately pre-processed input, we can then use the built-in predict method to obtain predictions given an image stored at `filepath`:
+We can then use this model to make predictions for images. It is essential that the images fed to the prediction method are scaled identically to the images used for training. The different **ResNet models** are trained on different input scales. It is thus essential to apply the correct image preprocessing. The module `keras.application.resnet_v2` contains the method `preprocess_input` which should be used when using a ResNetV2 network. This method expects the image arrays to be of type float and have values in **[0, 255]**. Using the appropriately pre-processed input, we can then use the built-in predict method to obtain predictions given an image stored at `filename`:
 
 ```python
 from tensorflow.keras.applications.resnet_v2 import preprocess_input
@@ -115,18 +115,18 @@ def is_car_acc_prob(predictions, thresh=THRESH, car_idx=CAR_IDX):
 
 The higher the threshold is set, the stricter the filtering procedure is. A value for the threshold that provides good results is `THRESH = 0.1`. This ensures we do not loose too many true car images. The choice of an appropriate threshold remains subjective, so do as you feel just.
 
-The COLAB notebook that uses the function `is_car_acc_prob` to filter the dataset is available in the [github repository](https://github.com/fabianmax/car-classification/blob/master/notebooks/prefilter.ipynb). 
+The Colab notebook that uses the function `is_car_acc_prob` to filter the dataset is available in the [github repository](https://github.com/fabianmax/car-classification/blob/master/notebooks/prefilter.ipynb). 
 
 While tuning the prefiltering procedure, we observed the following:
 
 * Many of the car images with light backgrounds were classified as "beach wagons". We thus decided to also consider the "beach wagon" class in imagenet as one of the `CAR_CLASSES`.
-* Images showing the front of a car is often assigned a high probability of "grille", which is the grating at the front of a car used for cooling. This assignment is correct but leads the procedure shown above to not consider certain car images as cars since we did not include "grille" in the `CAR_CLASSES`. This problem results in the trade off of either leaving a lot of close up images of car grilles in the dataset or filtering out a number of car images. We opted for the second approach since it yields a cleaner car dataset.
+* Images showing the front of a car are often assigned a high probability of "grille", which is the grating at the front of a car used for cooling. This assignment is correct but leads the procedure shown above to not consider certain car images as cars since we did not include "grille" in the `CAR_CLASSES`. This problem results in the trade off of either leaving a lot of close up images of car grilles in the dataset or filtering out a number of car images. We opted for the second approach since it yields a cleaner car dataset.
 
 After prefiltering the images using the suggested procedure, 53'738 of originally 64'467 remain in the dataset.
 
 ##### Data Overview
 
-The prefiltered dataset contains images from 323 car models. We decided to reduce our attention to the top 300 most frequent classes in the dataset. This makes sense, since some of the least frequent classes have less than 10 representatives and can thus not be reasonably split into a train, validation and test set. Reducing the dataset to images in the top 300 classes leaves us with a dataset containing 53'536 labelled images. The class counts are distributed as follows:
+The prefiltered dataset contains images from 323 car models. We decided to reduce our attention to the top 300 most frequent classes in the dataset. This makes sense, since some of the least frequent classes have less than 10 representatives and can thus not be reasonably split into a train, validation and test set. Reducing the dataset to images in the top 300 classes leaves us with a dataset containing 53'536 labelled images. The class occurrences are distributed as follows:
 
 <center><img src="histogram.png" title="Class count histogram" style="zoom:48%;" /></center>
 
@@ -238,10 +238,10 @@ class TransferModel:
 
 A few more details on the code above:
 
-- We first create a instance of class `tf.keras.applications.ResNet50V2`. With `include_top=False` we tell the pretrained model to leave out the original head of the model (in this case the classification of 1000 classes on ImageNet).
+- We first create an instance of class `tf.keras.applications.ResNet50V2`. With `include_top=False` we tell the pretrained model to leave out the original head of the model (in this case designed for the classification of 1000 classes on ImageNet).
 - `base_model.trainable = True` makes all layers trainable.
-- Using `tf.keras` functional API, we than stack a new pooling layer on top of the last convolution block of the original ResNet model. This is a nesessary intermediate step before feeding the output to the finale classification layer.
-- The final classification layer is than defined using `tf.keras.layers.Dense`. We define the number of neurons to be equal to the number of desired classes. And the softmax activation function makes sure that the output is a pseudo probaility in the range of `(0,1]` .
+- Using `tf.keras` functional API, we then stack a new pooling layer on top of the last convolution block of the original ResNet model. This is a nesessary intermediate step before feeding the output to the finale classification layer.
+- The final classification layer is then defined using `tf.keras.layers.Dense`. We define the number of neurons to be equal to the number of desired classes. And the softmax activation function makes sure that the output is a pseudo probaility in the range of `(0,1]` .
 
 The full version of `TransferModel` (see [github](https://github.com/fabianmax/car-classification/blob/master/car_classifier/modeling.py)) also contains the option to replace the base model by a VGG16 network, another standard CNN for image classification. In addition, it is also allows to unfreeze only certain layers, meaning we can make the corresponding parameters trainable while leaving the others fixed. As a default, we have made all parameters trainable here.
 
@@ -255,7 +255,7 @@ def compile(self, **kwargs):
     self.model.compile(**kwargs)
 ```
 
-We than pass the following  keyword arguments to our method:
+We then pass the following  keyword arguments to our method:
 
 - `loss = "categorical_crossentropy"`for multi-class classification, 
 - `optimizer = Adam(0.0001)` for using the Adam optimizer from `tf.keras.optimizers` with a rather small learning rate (more on the learning rate below), and
@@ -332,13 +332,13 @@ def predict(self, ds_new: tf.data.Dataset, proba: bool = True):
         return [np.argmax(x) for x in p]
 ```
 
- It is important that the dataset `ds_new` is not shuffled, else the predictions obtained will be misaligned with the images obtained when iterating over the dataset a second time. This is the case since the flag `reshuffle_each_iteration` is true by default in the `shuffle` method's implementation. A further important fact is that the `take` method is a generator object. This is important when you want to check out predictions e.g. for only one batch. The following code snippet illustrates the arising problem. `show_batch_with_pred` is a function that plots the images in `ds_batch` annotated with the predictions in `predictions`. 
+It is important that the dataset `ds_new` is not shuffled, else the predictions obtained will be misaligned with the images obtained when iterating over the dataset a second time. This is the case since the flag `reshuffle_each_iteration` is true by default in the `shuffle` method's implementation. A further effect of shuffling is that multiple calls to the `take` method will not return the same data. This is important when you want to check out predictions e.g. for only one batch. The following code snippet illustrates the arising problem. `show_batch_with_pred` is a function that plot the images in `ds_batch` annotated with the predictions in `predictions`. 
 
 ```python
 # Use construct_ds method from above to create a dataset
 ds = construct_ds(...)
 
-# Take one batch (e.g. 32 images) from the dataset: This creates a python generator!
+# Take 1 batch (e.g. 32 images) of dataset: This returns a new dataset
 ds_batch = ds.take(1)
 
 # Predict labels for one batch
@@ -349,7 +349,7 @@ predictions = model.predict(ds_batch)
 show_batch_with_pred(ds_batch, predictions)
 ```
 
-The predictions will **not** match the plotted images, since `ds_batch` is a generator and the second call to it will yield the next batch in the dataset `ds`. Thus for the object name to be aligned with its functionality, we would have to rename `ds_batch` to `ds_get_batch`. A function to plot images annotated with the corresponding predictions could look as follows:
+The predictions will in general **not** match the plotted images, since `ds_batch` is a Dataset object and the second call to it will yield shuffled data if the original Dataset uses `shuffle`. A function to plot images annotated with the corresponding predictions could look as follows:
 
 ```python
 def show_batch_with_pred(model, ds, classes, rescale=True, size=(10, 10), title=None):
