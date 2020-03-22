@@ -22,7 +22,7 @@ We will next give a brief introduction to the ResNet, a popular and powerful CNN
 
 ### ResNet
 
-Training deep neural networks can quickly become challenging due to the so called vanishing gradient problem. But what do we mean with vanishing gradients? Neural networks are commonly trained using back-propagation. This algorithms leverages the chain rule of calculus to derive gradients at a deeper layers of the network by multiplying with gradients from earlier layers. Since gradients get repeatedly multiplied in deep networks, during back-propagation, they can quickly approach infinitely small values.
+Training deep neural networks can quickly become challenging due to the so called vanishing gradient problem. But what do we mean with vanishing gradients? Neural networks are commonly trained using back-propagation. This algorithms leverages the chain rule of calculus to derive gradients at a deeper layers of the network by multiplying with gradients from earlier layers. Since gradients get repeatedly multiplied in deep networks, during back-propagation, they can quickly approach infinitesimally small values.
 
 [ResNet](https://arxiv.org/abs/1512.03385) is a CNN network that solves the vanishing gradient problem with so-called residual blocks (you find a good explanation why it is called 'residual' [here](https://towardsdatascience.com/residual-blocks-building-blocks-of-resnet-fd90ca15d6ec)). In the residual block the unmodified input is passed on to the next layer by adding it to a layer's output (see fight figure). This modification makes sure that a better information flow from the input to the deeper layers is possible. The entire ResNet architechture is depicted in the right network in the left figure below. It is plotted alongside a plain CNN and the VGG-19 network, another standard CNN architecture.
 
@@ -378,7 +378,7 @@ The model achieves slightly above 70% categorical accuracy for the task of predi
 
 <center><img src="heatmap_v3.png" title="Class count histogram" style="zoom:48%;" /></center>
 
-We restricted the heatmap to clip the confusion matrix' entries to [0, 5], as allowing for a further span did not significantly highlight any off-diagonal region. As can be seen from the heat map, there is one class that is assigned to examples of almost all classes. This can be seen from the dark red horizontal line two thirds to the right in the figure above. Other than the class mentioned before, there are no evident biases in the predictions.
+We restricted the heatmap to clip the confusion matrix' entries to [0, 5], as allowing for a further span did not significantly highlight any off-diagonal region. As can be seen from the heat map, there is one class that is assigned to examples of almost all classes. This can be seen from the dark red vertical line two thirds to the right in the figure above. Other than the class mentioned before, there are no evident biases in the predictions.
 
 ### Conclusion
 
