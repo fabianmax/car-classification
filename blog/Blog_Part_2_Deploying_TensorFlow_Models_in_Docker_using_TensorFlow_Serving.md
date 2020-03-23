@@ -2,7 +2,7 @@
 
 In the [first post]() (TODO link) of this series, we discussed transfer learning and built a model for car model classification. In this blog post, we will discuss the problem of model deployment, using the `TransferModel` introduced in the first post as an example. 
 
-In practice, a model is of no use if there is no simple way it can be interacted with. In other words: We need an API for our models. TensorFlow Serving has been developed to provide this functionalities for TensorFlow models. In this blog post, we will show how a TensorFlow Serving server can be launched in a Docker container and how we can interact with the server using HTTP requests. If you are new to Docker, we recommend working through Docker's [tutorial](https://docker-curriculum.com/) prior to reading this post. If you want to look at an example of deployment in Docker, we recommend reading Oli's [blog post](https://www.statworx.com/de/blog/running-your-r-script-in-docker/) describing how an R-script can be run in Docker. We start by giving an overview of TensorFlow Serving.
+In practice, a model is of no use if there is no simple way it can be interacted with. In other words: We need an API for our models. TensorFlow Serving has been developed to provide these functionalities for TensorFlow models. In this blog post, we will show how a TensorFlow Serving server can be launched in a Docker container and how we can interact with the server using HTTP requests. If you are new to Docker, we recommend working through Docker's [tutorial](https://docker-curriculum.com/) prior to reading this post. If you want to look at an example of deployment in Docker, we recommend reading Oli's [blog post](https://www.statworx.com/de/blog/running-your-r-script-in-docker/) describing how an R-script can be run in Docker. We start by giving an overview of TensorFlow Serving.
 
 ## Introduction to TensorFlow Serving
 
@@ -10,17 +10,17 @@ TensorFlow Serving is TensorFlow's serving system, designed to enable deployment
 
 ## Implementation
 
-We will now discuss the following three steps required for deploying the model and sending requests.
+We will now discuss the following three steps required to deploy the model and to send requests.
 
 * Save a model in correct format and folder structure using TensorFlow SavedModel
-* Serving server running inside a Docker container
-* REST requests to interact with the model
+* Run a Serving server inside a Docker container
+* Interact with the model using REST requests
 
 ### Saving TensorFlow Models
 
 If you didn't read this series' first post, we briefly summarize the most important points needed to understand the code below: 
 
-The `TransferModel.model` is a `tf.keras.Model` instance, so it can be saved using `Model`'s built-in `save` method. Further, as the model was trained on web-scraped data, the class labels can change when re-scraping the data. We thus decided to store the index-class mapping when storing the model in `classes.pickle`. TensorFlow Serving requires the model to be stored in the [SavedModel format](https://www.tensorflow.org/guide/saved_model). When using `tf.keras.Model.save`, the path must be a folder name, else the model will be stored in another format which is not compatible with TensorFlow Serving. Below, `folderpath` contains the path of the folder we want to store all model relevant information in. The SavedModel is stored in `folderpath/model` and the class mapping is stored as `folderpath/classes.pickle`.
+The `TransferModel.model` is a `tf.keras.Model` instance, so it can be saved using `Model`'s built-in `save` method. Further, as the model was trained on web-scraped data, the class labels can change when re-scraping the data. We thus store the index-class mapping when storing the model in `classes.pickle`. TensorFlow Serving requires the model to be stored in the [SavedModel format](https://www.tensorflow.org/guide/saved_model). When using `tf.keras.Model.save`, the path must be a folder name, else the model will be stored in another format (e.g. HDF5) which is not compatible with TensorFlow Serving. Below, `folderpath` contains the path of the folder we want to store all model relevant information in. The SavedModel is stored in `folderpath/model` and the class mapping is stored as `folderpath/classes.pickle`.
 
 ```python
 def save(self, folderpath: str):
@@ -49,9 +49,9 @@ def save(self, folderpath: str):
 
 ### Start TensorFlow Serving in Docker Container
 
-Having saved the model to the disk, the next steps is to start the TensorFlow Serving Server. Fortunately, there is an easy to use Docker container available. The first step is therefore pulling the TensorFlow Serving image from DockerHub. This can be done in the terminal using the command `docker pull tensorflow/serving`. 
+Having saved the model to the disk, the next step is to start the TensorFlow Serving server. Fortunately, there is an easy-to-use Docker container available. The first step is therefore pulling the TensorFlow Serving image from DockerHub. This can be done in the terminal using the command `docker pull tensorflow/serving`. 
 
-Then we can use the code below to start a TensorFlow Serving container. It runs a shell command to start a container. The options set in the `docker_run_cmd` are the following: 
+Then we can use the code below to start a TensorFlow Serving container. It runs the shell command for starting a container. The options set in the `docker_run_cmd` are the following: 
 
 - The serving image exposes port 8501 for the REST API which we will use later to send requests. Thus we map the host port 8501 to the container's 8501 port using `-p`. 
 - Next, we mount our model to the container using `-v`. It is essential that the model is stored in a versioned folder (here MODEL_VERSION=1) else the serving image will not find the model. `model_path_guest` thus must be of the form `<path>/<model name>/MODEL_VERSION`, where `MODEL_VERSION` is an integer.
@@ -95,13 +95,13 @@ os.system(docker_run_cmd_cond)
 
 (TODO: update filename to an up to date one and upload that one model to git)
 
-Instead of mounting the model from our local disk using the `-v` flag in the docker command, we could also copy the model into the docker image, so the model could be served simply by running a container and specifying the port assignments. It is important to note that, in this case, the model needs to be saved using the folder structure `folderpath/<model name>/1`, as explained above. If this is not the case, TensorFlow Serving will not find the model. We will not go into further detail here. For a guide, we refer to [this guide](https://www.tensorflow.org/tfx/serving/docker#creating_your_own_serving_image) on the TensorFlow website.
+Instead of mounting the model from our local disk using the `-v` flag in the docker command, we could also copy the model into the docker image, so the model could be served simply by running a container and specifying the port assignments. It is important to note that, in this case, the model needs to be saved using the folder structure `folderpath/<model name>/1`, as explained above. If this is not the case, TensorFlow Serving will not find the model. We will not go into further detail here. If you are interested in deploying your models in this way, we refer to [this guide](https://www.tensorflow.org/tfx/serving/docker#creating_your_own_serving_image) on the TensorFlow website.
 
 ### REST Request
 
 Since the model is now served and ready to use, we need a way to interact with it. TensorFlow Serving provides two options to send requests to the server: [gRCP](https://grpc.io/) and REST API, both exposed at different ports. In the following code example, we will use REST to query the model.
 
-First, we load an image from the disk for which we want a prediction. This can be done using the `image` function from TensorFlow. Next, we convert the image to an numpy array using the `img_to_array`-method. The next and final step is very important: since we preprocessed the training image before we trained our model (e.g. normalization), we need to apply the same transformation on image we want to predict. The handy `preprocess_input` function makes sure that all necessary transformations are applied to our image.
+First, we load an image from the disk for which we want a prediction. This can be done using TensorFlow's `image` module. Next, we convert the image to a numpy array using the `img_to_array`-method. The next and final step is very important: since we preprocessed the training image before we trained our model (e.g. normalization), we need to apply the same transformation on image we want to predict. The handy `preprocess_input` function makes sure that all necessary transformations are applied to our image.
 
 ```python
 from tensorflow.keras.preprocessing import image
@@ -151,7 +151,7 @@ y_hat_idx = np.argmax(predictions)
 y_hat = classes[y_hat_idx]
 ```
 
-The response body will also be a JSON object with a single key called `predictions`. Since we get for each row in instances the probability for all 300 classes, we use `np.argmax` to return the most likely class. Alternativly, we could have used the higher-level classify API.
+The response body will also be a JSON object with a single key called `predictions`. Since we get for each row in instances the probability for all 300 classes, we use `np.argmax` to return the most likely class. Alternatively, we could have used the higher-level classify API.
 
 ### Conclusion
 
