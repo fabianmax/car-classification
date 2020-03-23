@@ -272,7 +272,8 @@ from tensorflow.keras.callbacks import EarlyStopping
 def train(self,
           ds_train: tf.data.Dataset,
           epochs: int,
-          ds_valid: tf.data.Dataset = None):
+          ds_valid: tf.data.Dataset = None,
+          class_weights: np.array = None):
     """
     Trains model on ds_train for epochs rounds and validates
     on ds_valid if passed
@@ -281,6 +282,7 @@ def train(self,
         ds_train: training data as tf.data.Dataset
         epochs: number of epochs to train
         ds_valid: optional validation data as tf.data.Dataset
+        class_weights: optional class weights to treat unbalanced classes
 
     Returns
         Training history from self.history
@@ -298,12 +300,13 @@ def train(self,
     self.history = self.model.fit(ds_train,
                                   epochs=epochs,
                                   validation_data=ds_valid,
-                                  callbacks=callbacks)
+                                  callbacks=callbacks,
+                                  class_weight=class_weights)
 
     return self.history
 ```
 
-As our model is an instance of `tensorflow.keras.Model`, we can train it using the `fit` method. To prevent overfitting, early stopping is used by passing it to the fit method as a callback function. The patience parameter can be tuned to specify how soon early stopping should apply. The parameter stands for the number of epochs after which, if no decrease of the validation loss is registered, the training will be interrupted.
+As our model is an instance of `tensorflow.keras.Model`, we can train it using the `fit` method. To prevent overfitting, early stopping is used by passing it to the fit method as a callback function. The patience parameter can be tuned to specify how soon early stopping should apply. The parameter stands for the number of epochs after which, if no decrease of the validation loss is registered, the training will be interrupted. Further, class weights can be passed to the `fit` method. Class weights allow treating unbalanced data by assigning the different classes different weights, thus allowing to increase the impact of classes with fewer training examples.
 
 We can describe the training process using a pretrained model as follows: As the weights in the head are initialized randomly and the weights of the base model are pretrained, the training composes of training the head from scratch and fine tuning the pretrained model's weights. It is recommended to use a small learning rate (e.g. 1e-4) since choosing the learning rate too large can destroy the near optimal pretrained weights of the base model.
 
