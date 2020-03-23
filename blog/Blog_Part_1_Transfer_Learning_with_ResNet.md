@@ -1,6 +1,6 @@
 ## Transfer Learning with ResNet
 
-At [STATWORX](www.statworx.com), we are very passionate about the field of deep learning. In this blog series, we want to illustrate how an end-to-end deep learning project can be implemented. We use TensorFlow 2.x library for the implementation. The topics of the series include transfer learning for computer vision, model deployment via TensorFlow Serving, integrating the model into a Dash dashboard and interpretability of deep learning models via Grad-CAM.
+At [STATWORX](https://www.statworx.com), we are very passionate about the field of deep learning. In this blog series, we want to illustrate how an end-to-end deep learning project can be implemented. We use TensorFlow 2.x library for the implementation. The topics of the series include transfer learning for computer vision, model deployment via TensorFlow Serving, integrating the model into a Dash dashboard and interpretability of deep learning models via Grad-CAM.
 
 In the first part, we are going to show how transfer learning can be used to tackle the problem of car image classification. We start by giving a brief overview of transfer learning and the ResNet, and then go into the implementation details. The code presented can be found in [this github repository](https://github.com/fabianmax/car-classification).
 
