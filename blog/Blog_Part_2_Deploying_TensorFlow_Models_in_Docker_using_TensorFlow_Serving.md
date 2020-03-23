@@ -92,9 +92,6 @@ docker_run_cmd_cond = f'if [ ! "$(docker ps -q -f name=tf_serving)" ]; then \n' 
 # Start container
 os.system(docker_run_cmd_cond)
 ```
-
-(TODO: update filename to an up to date one and upload that one model to git)
-
 Instead of mounting the model from our local disk using the `-v` flag in the docker command, we could also copy the model into the docker image, so the model could be served simply by running a container and specifying the port assignments. It is important to note that, in this case, the model needs to be saved using the folder structure `folderpath/<model name>/1`, as explained above. If this is not the case, TensorFlow Serving will not find the model. We will not go into further detail here. If you are interested in deploying your models in this way, we refer to [this guide](https://www.tensorflow.org/tfx/serving/docker#creating_your_own_serving_image) on the TensorFlow website.
 
 ### REST Request
