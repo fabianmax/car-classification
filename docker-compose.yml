@@ -1,0 +1,43 @@
+version: '3.7'
+services:
+  tfserving:
+    image: tensorflow/serving
+    container_name: tf_serving
+    ports:
+      - 8501:8501
+    networks:
+      default-car-dashboard:
+        aliases:
+          - tf_serving
+    volumes:
+      - .Data/models/final_unfreeze_all_model_v3/model:/models/resnet_unfreeze_all_filtered/1
+    environment:
+      - MODEL_NAME=resnet_unfreeze_all_filtered
+  cardashboard:
+    image: cardashboard
+    container_name: cardashboard
+    depends_on:
+      - nginx
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    ports:
+      - 8050:8050
+    networks:
+      - default-car-dashboard
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+      - 1234:80
+    networks:
+      default-car-dashboard:
+        aliases:
+          - nginx
+    volumes:
+      - ./Data/Images/:/usr/share/nginx/html:ro
+      - ./dashboard/nginx.conf:/etc/nginx/nginx.conf:ro
+
+networks:
+  default-car-dashboard:
+    name: car_dashboard

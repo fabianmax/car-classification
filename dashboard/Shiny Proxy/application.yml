@@ -1,0 +1,13 @@
+proxy:
+  port: 8080
+  authentication: none
+  #docker:
+  #    internal-networking: true
+  specs:
+  - id: car-dashboard
+    display-name: Car Dashboard
+    port: 8050
+    container-cmd: ["gunicorn", "--bind", "0.0.0.0:8050", "launch_dashboard:server"]
+    #container-cmd: ['python', 'launch_dashboard.py']
+    container-image: car_dashboard
+    #container-network: sp-car-dashboard

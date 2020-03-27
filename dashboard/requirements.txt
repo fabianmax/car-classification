@@ -1,0 +1,12 @@
+# To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
+gunicorn==20.0.4
+dash
+dash-bootstrap-components
+requests
+#tensorflow
+#dash==1.1.1
+#dash-bootstrap-components==0.7.2
+#dash-core-components==1.1.1
+#dash-html-components==1.0.0
+#dash-renderer==1.0.0
+#dash-table==4.1.0
