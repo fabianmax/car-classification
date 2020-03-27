@@ -1,6 +1,6 @@
-## Interpretability of Deep Learning Models with Grad-CAM
+## Explainability of Deep Learning Models with Grad-CAM
 
-In the [first post]() (TODO: link), we built a model using transfer learning to classify the car model given an image of a car. In the [second post]() (TODO: link), we showed how TensorFlow Serving can be used to deploy a TensorFlow model using the car model classifier as an example. We dedicate this third post to another important aspect of deep learning and machine learning in general: interpretability of model predictions.
+In the [first post]() (TODO: link), we built a model using transfer learning to classify the car model given an image of a car. In the [second post]() (TODO: link), we showed how TensorFlow Serving can be used to deploy a TensorFlow model using the car model classifier as an example. We dedicate this third post to another important aspect of deep learning and machine learning in general: explainability of model predictions.
 
 We will start with a short general introduction to the topic of explainability in machine learning. Next, we will briefly talk about popular methods that can be used to explain and interpret predictions from CNNs. We will then explain Grad-CAM, a gradient-based method, in depth by going through an implementation step by step. Finally, we will show the results obtained by our Grad-CAM implementation for the car model classifier.
 

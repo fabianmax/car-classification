@@ -18,7 +18,7 @@ In this blog post, we have served a TensorFlow model for image recognition using
 Link to full blog post on STATWORX.com (coming soon)  
 [Link to full blog post in this repo](https://github.com/fabianmax/car-classification/blob/master/blog/Blog_Part_2_Deploying_TensorFlow_Models_in_Docker_using_TensorFlow_Serving.md)
 
-## Part 3: Interpretability of Deep Learning Models with Grad-CAM
+## Part 3: Explainability of Deep Learning Models with Grad-CAM
 
 We discussed multiple approaches to explain CNN classifier outputs. We introduced Grad-CAM in detail by discussing the code and looking at examples for the car model classifier. Most notably, the discriminatory regions highlighted by the Grad-CAM procedure are always focussed on the car and never on the backgrounds of the images. The result shows that the model works as we expect and indeed uses specific parts of the car to discriminate between different models.
 
