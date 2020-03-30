@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 import pickle
 
@@ -255,34 +255,34 @@ class TransferModel:
         pred = self.predict(img, proba=False)
         return classes[pred[0]]
 
-    def plot(self, what: str = 'metric'):
-        """
-        Show a visualization of training and validation process
-
-        Args:
-            what: Plot training loss or metric?
-        """
-
-        if self.history is None:
-            AttributeError("No training history available, call TransferModel.train first")
-
-        if what not in ['metric', 'loss']:
-            AttributeError(f'what must be either "loss" or "metric"')
-
-        if what == 'metric':
-            metric = self.model.metrics_names[1]
-            y_1 = self.history.history[metric]
-            y_2 = self.history.history['val_' + metric]
-            y_label = metric
-        elif what == 'loss':
-            y_1 = self.history.history['loss']
-            y_2 = self.history.history['val_loss']
-            y_label = 'loss'
-
-        plt.plot(y_1)
-        plt.plot(y_2)
-        plt.title('Model Performance')
-        plt.ylabel(y_label)
-        plt.xlabel('Epoch')
-        plt.legend(['Train', 'Test'], loc='upper left')
-        plt.show()
+    # def plot(self, what: str = 'metric'):
+    #     """
+    #     Show a visualization of training and validation process
+    #
+    #     Args:
+    #         what: Plot training loss or metric?
+    #     """
+    #
+    #     if self.history is None:
+    #         AttributeError("No training history available, call TransferModel.train first")
+    #
+    #     if what not in ['metric', 'loss']:
+    #         AttributeError(f'what must be either "loss" or "metric"')
+    #
+    #     if what == 'metric':
+    #         metric = self.model.metrics_names[1]
+    #         y_1 = self.history.history[metric]
+    #         y_2 = self.history.history['val_' + metric]
+    #         y_label = metric
+    #     elif what == 'loss':
+    #         y_1 = self.history.history['loss']
+    #         y_2 = self.history.history['val_loss']
+    #         y_label = 'loss'
+    #
+    #     plt.plot(y_1)
+    #     plt.plot(y_2)
+    #     plt.title('Model Performance')
+    #     plt.ylabel(y_label)
+    #     plt.xlabel('Epoch')
+    #     plt.legend(['Train', 'Test'], loc='upper left')
+    #     plt.show()

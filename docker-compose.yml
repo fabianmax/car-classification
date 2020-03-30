@@ -13,6 +13,20 @@ services:
       - ./Data/Model/:/models/resnet_unfreeze_all_filtered/1
     environment:
       - MODEL_NAME=resnet_unfreeze_all_filtered
+  explainability:
+    image: explainability
+    container_name: gradcam
+    build:
+      context: ./car_classifier
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+    networks:
+      default-car-dashboard:
+        aliases:
+          - explainability
+    volumes:
+      - ./Data/Model/:/models/resnet_unfreeze_all_filtered/1
   cardashboard:
     image: cardashboard
     container_name: cardashboard

@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
-from car_classifier.modeling import TransferModel
+from modeling import TransferModel
 from tensorflow.keras.preprocessing import image
 
 from tensorflow.keras.applications.resnet_v2 import preprocess_input
@@ -17,7 +17,7 @@ classes = [0, 1]
 
 # Load model
 model = TransferModel('ResNet', INPUT_SHAPE, classes=classes)
-model.load('/Users/stephanmueller/Google Drive/Car-Classifier/models/final_unfreeze_all_model_v3')
+model.load('/models/resnet_unfreeze_all_filtered/1')
 
 
 # Create instance of flask
@@ -104,4 +104,4 @@ def grad_cam():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)  # run app in debug mode on port 5000
+    app.run(debug=True, host='0.0.0.0')  # run app in debug mode on port 5000
