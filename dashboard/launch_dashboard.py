@@ -98,7 +98,7 @@ def btn_click_event(n_clicks: int, car_brand: str, car_model: str) -> str:
 @app.callback(Output('error-alert', 'hidden'), [Input('btn', 'n_clicks')],
               [State('car-brand', 'value'),
                State('car-model', 'value')])
-def is_dropdown_empty(n_clicks, car_brand, car_model):
+def is_dropdown_empty(n_clicks: int, car_brand: str, car_model: str) -> bool:
     if n_clicks is not None and n_clicks > 0:
         if car_brand is None or car_model is None:
             return False
@@ -145,7 +145,7 @@ def reset(n_clicks: int) -> None:
     [Input("navbar-toggler", "n_clicks")],
     [State("navbar-collapse", "is_open")],
 )
-def toggle_navbar_collapse(n, is_open: bool) -> bool:
+def toggle_navbar_collapse(n: int, is_open: bool) -> bool:
     if n:
         return not is_open
     return is_open

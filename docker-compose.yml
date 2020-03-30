@@ -10,7 +10,7 @@ services:
         aliases:
           - tf_serving
     volumes:
-      - .Data/models/final_unfreeze_all_model_v3/model:/models/resnet_unfreeze_all_filtered/1
+      - ./Data/models/final_unfreeze_all_model_v3/model/:/models/resnet_unfreeze_all_filtered/1
     environment:
       - MODEL_NAME=resnet_unfreeze_all_filtered
   cardashboard:
@@ -18,6 +18,7 @@ services:
     container_name: cardashboard
     depends_on:
       - nginx
+      - tfserving
     build:
       context: ./dashboard
       dockerfile: Dockerfile
