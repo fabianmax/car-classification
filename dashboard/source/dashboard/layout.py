@@ -1,5 +1,4 @@
-from collections import defaultdict
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 import dash
 import dash_bootstrap_components as dbc
@@ -12,6 +11,14 @@ COLOR_STATWORX = "#013848"
 
 
 def count_score(data: GameData) -> Tuple[int, int]:
+    """Calculates the current score of user and ai
+
+    Arguments:
+        data {GameData} -- Game data
+
+    Returns:
+        Tuple[int, int] -- user and ai score
+    """
     score_user = score_ai = 0
 
     for item in data.items:
@@ -28,6 +35,17 @@ def count_score(data: GameData) -> Tuple[int, int]:
 
 
 def main_layout(app: dash.Dash, data: GameData, content: html) -> html:
+    """Main layout which consists of the header, footer
+    and a dynamically changing main layout
+
+    Arguments:
+        app {dash.Dash} -- dash app instance
+        data {GameData} -- game data
+        content {html} -- layout for the main content
+
+    Returns:
+        html -- html layout
+    """
     layout = html.Div([
         html.Header(get_header(app, data)),
         html.Main(id='page-content', children=[content]),
@@ -38,6 +56,15 @@ def main_layout(app: dash.Dash, data: GameData, content: html) -> html:
 
 
 def get_header(app: dash.Dash, data: GameData) -> html:
+    """Layout for the header
+
+    Arguments:
+        app {dash.Dash} -- dash app instance
+        data {GameData} -- game data
+
+    Returns:
+        html -- html layout
+    """
     logo = app.get_asset_url("logo.png")
 
     score_user, score_ai = count_score(data)
@@ -80,7 +107,6 @@ def get_header(app: dash.Dash, data: GameData) -> html:
                              navbar=True),
             ],
             color=COLOR_STATWORX,
-            #color="primary",
             dark=True,
         ),
         className='mb-4 mt-4 navbar-custom')
@@ -89,6 +115,11 @@ def get_header(app: dash.Dash, data: GameData) -> html:
 
 
 def get_footer() -> html:
+    """Layout for the footer
+
+    Returns:
+        html -- html layout
+    """
     footer = dbc.Container([
         html.Hr(),
         html.Div([
@@ -104,6 +135,11 @@ def get_footer() -> html:
 
 
 def start_page() -> html:
+    """Layout for the start/index page
+
+    Returns:
+        html -- html layout
+    """
     start_page = dbc.Container(
         dbc.Jumbotron([
             html.H1("Can you beat our AI?", className="display-3"),
@@ -117,10 +153,6 @@ def start_page() -> html:
             P("We'll show you a picture of a car (part) and you'll have to guess "
               "its brand and model. Our AI will do the same. Let's see who's better at "
               "guessing cars in the next 5 rounds! ;)"),
-            #html.
-            #P("Within 5 rounds you can try to beat our AI. We'll show you a picture of a car (part). "
-            #  "You have to guess the brand and model of the car. "
-            #  "Our AI will do the same. Let's see who's better with cars ;) "),
             html.P(dbc.Button("Let's Play!",
                               color="primary",
                               href="/attempt",
@@ -135,6 +167,16 @@ def start_page() -> html:
 
 
 def finish_page(app: dash.Dash, data: GameData) -> html:
+    """Layout for the finish page. This page get display once all
+    rounds are played and the final score is determined.
+
+    Arguments:
+        app {dash.Dash} -- dash app instance
+        data {GameData} -- game data
+
+    Returns:
+        html -- html layout
+    """
     score_user, score_ai = count_score(data)
 
     layout = dbc.Container([
@@ -177,11 +219,20 @@ def finish_page(app: dash.Dash, data: GameData) -> html:
 
 
 def attempt(app: dash.Dash, data: GameData) -> html:
+    """Layout for the attempt page. 
+    At tis page, the user is able to make his prediction.
+
+    Arguments:
+        app {dash.Dash} -- dash app instance
+        data {GameData} -- game data
+
+    Returns:
+        html -- html layout
+    """
     idx = data.current_round
-    #img_raw = app.get_asset_url(str(data.items[idx].picture_raw))
     img_raw = str(data.items[idx].picture_raw)
 
-    print(data.items[idx].ground_truth)
+    print('Ground Truth:', data.items[idx].ground_truth)
 
     layout = dbc.Container([
         html.Div(dbc.Row(dbc.Col(
@@ -229,16 +280,24 @@ def attempt(app: dash.Dash, data: GameData) -> html:
 
 
 def result(app: dash.Dash, data: GameData) -> html:
+    """Layout for the result page. This page get display after every user prediction.
+    This pages displays the predictions from the user and the ai together with
+    the ground truth. An explanation for the ai prediction is also provided.
+
+    Arguments:
+        app {dash.Dash} -- dash app instance
+        data {GameData} -- game data
+
+    Returns:
+        html -- html layout
+    """
     item = data.items[data.current_round]
-    #img_raw = app.get_asset_url(str(item.picture_raw))
-    #img_explained = app.get_asset_url(str(item.picture_explained))
     img_raw = str(item.picture_raw)
-    img_explained = str(item.picture_explained)
-    ai_prediction = defaultdict(list)
+    # img_explained = str(item.picture_explained)
+    ai_prediction: Dict[str, Any] = {'x': [], 'y': []}
     ai_prediction['type'] = 'bar'
     ai_prediction['orientation'] = 'h'
-    ai_prediction['marker'] = dict(color=COLOR_STATWORX)
-    #ai_prediction['layout'] = dict(margin={"l": "2000px"})
+    ai_prediction['marker'] = {'color': COLOR_STATWORX}
 
     # Prepare data for the plot
     for ai_item in item.prediction_ai:
@@ -298,21 +357,35 @@ def result(app: dash.Dash, data: GameData) -> html:
                 className='mb-4'),
         dbc.Row(
             children=[
-                #dbc.Col(dbc.Card(dbc.CardImg(src=img_explained))),
+                # dbc.Col(dbc.Card(dbc.CardImg(src=img_explained))),
                 dbc.Col(
                     dbc.Card(
                         dbc.CardBody(
-                            dcc.Graph(
-                                figure={'data': [ai_prediction]},
-                                config={
-                                    'showTips': False,
-                                    'displayModeBar': False,
-                                    'doubleClick': False
-                                },
-                                #style={'width': '100%'}
-                            )),
-                        #className='text-center'
-                    ))
+                            dcc.Graph(figure={
+                                'data': [ai_prediction],
+                                'layout': {
+                                    'margin': {
+                                        'l': 200
+                                    },
+                                    'yaxis': {
+                                        'automargin': True,
+                                        'autorange': 'reversed'
+                                    },
+                                    'xaxis': {
+                                        'automargin': True
+                                    },
+                                    'autosize': True
+                                }
+                            },
+                                      config={
+                                          'showTips': False,
+                                          'displayModeBar': False,
+                                          'doubleClick': False,
+                                      },
+                                      style={
+                                          'flex': 1,
+                                          'margin': '10px'
+                                      })), ))
             ],
             className='mb-4'),
         # Needed to circumvent dash limitations

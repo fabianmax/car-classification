@@ -1,4 +1,3 @@
-# To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
 gunicorn==20.0.4
 dash==1.9.1
 dash-bootstrap-components==0.9.1
