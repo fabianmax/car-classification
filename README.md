@@ -4,6 +4,33 @@ This repository containes code and documentation for a series of blog posts I wr
 
 The series was originally inspired by this [reddit post](https://www.reddit.com/r/MachineLearning/comments/ek5zwv/p_64000_pictures_of_cars_labeled_by_make_model/?utm_source=share&utm_medium=ios_app&utm_name=iossmf). If you want to reproduce the results, please find the data available [here](https://drive.google.com/file/d/1TQQuT60bddyeGBVfwNOk6nxYavxQdZJD/view) or alternatively go to the original [GitHub repo](https://github.com/nicolas-gervais/predicting-car-price-from-scraped-data/tree/master/picture-scraper).   
 
+## How to use this Repo?
+1. Download/Clone this repo (`git clone https://github.com/fabianmax/car-classification.git`)
+2. Copy Images into Data/Images
+3. Copy Model into Data/Model
+4. Execute docker-compose file (`docker-compose up`)
+5. Open http://localhost:8050/ and start playing! (`open http://localhost:8050/`)
+
+Note: At the end your folder structure should be similar to this one:
+
+```
+.
++-- car_classifier
++-- dashboard
++-- Data
+|   +-- Images
+|       +-- carbrand1_carmodel1_...._.jpg
+|       +-- carbrand2_carmodel2_...._.jpg
+|       +-- carbrand3_carmodel3_...._.jpg
+|   +-- Model
+|       +-- saved_model.pb
+|       +-- variables
+|           +-- variables.index
+|           +-- variables.data-00001-of-00002
+|           +-- variables.data-00000-of-00002
+|-- ...
+```
+
 ## Part 1: Transfer Learning using ResNet50V2 in TensorFlow
 
 In this blog, we have applied transfer learning using the ResNet50V2 to classify the car model from images of cars. Our model achieves 70% categorical accuracy over 300 classes. We found unfreezing the entire base model and using a small learning rate to achieve the best results.
@@ -27,4 +54,4 @@ Link to full blog post on STATWORX.com (coming soon)
 
 ## Part 4: Integrating Deep Learning Models with Dash
 
-*comming soon*
+*coming soon*
