@@ -219,7 +219,7 @@ def finish_page(app: dash.Dash, data: GameData) -> html:
 
 
 def attempt(app: dash.Dash, data: GameData) -> html:
-    """Layout for the attempt page. 
+    """Layout for the attempt page.
     At tis page, the user is able to make his prediction.
 
     Arguments:

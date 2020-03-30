@@ -16,12 +16,12 @@ from .labels import CLASSES
 # Set the URLs accordingly
 is_in_docker = getenv('IS_IN_DOCKER', False)
 if not is_in_docker:
-    IMAGE_URL_INTERNAL = IMAGE_URL_EXTERNAL = 'http://localhost:1234/Raw/'
+    IMAGE_URL_INTERNAL = IMAGE_URL_EXTERNAL = 'http://localhost:1234/'
     PREDICTION_URL_INTERNAL = 'http://localhost:8501/v1/models/resnet_unfreeze_all_filtered:predict'
 
 else:
-    IMAGE_URL_INTERNAL = 'http://nginx/Raw/'
-    IMAGE_URL_EXTERNAL = 'http://localhost:1234/Raw/'
+    IMAGE_URL_INTERNAL = 'http://nginx/'
+    IMAGE_URL_EXTERNAL = 'http://localhost:1234/'
     PREDICTION_URL_INTERNAL = 'http://tf_serving:8501/v1/models/resnet_unfreeze_all_filtered:predict'
 
 
