@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from pathlib import Path
+from os import getenv
 from random import choices
 from typing import List
 from urllib.parse import quote
@@ -13,9 +13,17 @@ from imageio import imread
 
 from .labels import CLASSES
 
-# IMAGE_URL_INTERNAL = 'http://nginx/Raw/'
-IMAGE_URL_INTERNAL = IMAGE_URL_EXTERNAL = 'http://localhost:1234/Raw/'
-PREDICTION_URL_INTERNAL = 'http://tf_serving'
+is_in_docker = getenv('IS_IN_DOCKER', False)
+if not is_in_docker:
+    print("Dashboard is running locally")
+    IMAGE_URL_INTERNAL = IMAGE_URL_EXTERNAL = 'http://localhost:1234/Raw/'
+    PREDICTION_URL_INTERNAL = 'http://localhost:8501/v1/models/resnet_unfreeze_all_filtered:predict'
+
+else:
+    print("Dashboard is running inside a docker container")
+    IMAGE_URL_INTERNAL = 'http://nginx/Raw/'
+    IMAGE_URL_EXTERNAL = 'http://localhost:1234/Raw/'
+    PREDICTION_URL_INTERNAL = 'http://tf_serving:8501/v1/models/resnet_unfreeze_all_filtered:predict'
 
 
 @dataclass
@@ -68,16 +76,19 @@ class GameData:
         # TODO: Return top 5 predictions for chart
 
         # Download Picture
-        img_url = IMAGE_URL_EXTERNAL + quote(image_name)
+        img_url = IMAGE_URL_INTERNAL + quote(image_name)
         print('url', img_url)
         img = imread(img_url)
 
         # Get Prediction from TF Serving
         # Preprocess and reshape data
+        img = img.astype(np.float32)
+        img /= 127.5
+        img -= 1.
         img = img.reshape(-1, *img.shape)
 
         # Send data as list to TF serving via json dump
-        request_url = 'http://localhost:8501/v1/models/resnet_unfreeze_all_filtered:predict'
+        request_url = PREDICTION_URL_INTERNAL
         request_body = json.dumps({
             "signature_name": "serving_default",
             "instances": img.tolist()
@@ -95,20 +106,18 @@ class GameData:
         model = label_comp[1]
         certainty = np.max(predictions)
 
-        print('Input Image:', image_name)
-        print('Prediction Brand:', brand)
-        print('Prediction Model:', model)
-        print('Certainty:', certainty)
-        print('Raw Predictions:')
-        print(predictions)
+        # print('Input Image:', image_name)
+        # print('Prediction Brand:', brand)
+        # print('Prediction Model:', model)
+        # print('Certainty:', certainty)
 
         return ItemLabel(brand, model, certainty)
 
 
 @dataclass
 class Item:
-    picture_raw: Path
-    picture_explained: Path
+    picture_raw: str
+    picture_explained: str
     prediction_ai: List[ItemLabel]
     ground_truth: ItemLabel
     prediction_user: ItemLabel = field(init=False)
@@ -120,7 +129,7 @@ class ItemLabel:
     model: str
     certainty: float = 1
 
-    def __eq__(self, other) -> bool:
-        if other.__class__ is not self.__class__:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ItemLabel):
             return NotImplemented
         return (self.brand, self.model) == (other.brand, other.model)

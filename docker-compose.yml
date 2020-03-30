@@ -26,6 +26,9 @@ services:
       - 8050:8050
     networks:
       - default-car-dashboard
+    environment:
+      - IS_IN_DOCKER=True
+    restart: on-failure
   nginx:
     image: nginx
     container_name: nginx

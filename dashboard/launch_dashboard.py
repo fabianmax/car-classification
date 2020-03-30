@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 import dash
 import dash_bootstrap_components as dbc
@@ -6,8 +6,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-
-from source.dashboard import (attempt, finish_page, main_layout, result, start_page)
+from source.dashboard import (attempt, finish_page, main_layout, result,
+                              start_page)
 from source.data import LABELS, GameData, ItemLabel
 
 # Load Game Data
@@ -114,7 +114,7 @@ def is_dropdown_empty(n_clicks: int, car_brand: str, car_model: str) -> bool:
      Output('car-model', 'options')],
     [Input('car-brand', 'value')],
 )
-def set_model_dropdown(car_brand: str) -> Tuple[bool, List[Optional[Dict[str, str]]]]:
+def set_model_dropdown(car_brand: str) -> Tuple[bool, List[Dict[str, str]]]:
     if not car_brand == 'ignore':
         if car_brand is not None:
             car_labels = [{
