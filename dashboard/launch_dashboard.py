@@ -1,14 +1,15 @@
-
-
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 
+# Needed to launch production server
+from app import server  # noqa: F401
 from app import app, game_data
-from source.dashboard import (attempt, callbacks, finish_page,  # noqa: F401
-                              main_layout, result, start_page)
+# Needed to "active" callbacks
+from source.dashboard import callbacks  # noqa: F401
+from source.dashboard import (attempt, finish_page, main_layout, result, start_page)
 
 # Set title
 app.title = 'Beat the AI - Car Edition'
