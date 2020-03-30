@@ -31,12 +31,19 @@ class GameData:
     """
     items: List[Item] = field(init=False)
     current_round = 0
-    max_rounds: int = 3
+    max_rounds: int = 4
     validation_error: bool = False
 
     def __post_init__(self) -> None:
         """Initialize data upon creation of the class
         """
+        self.items = self.initialize_data()
+
+    def reset(self) -> None:
+        """Reset the game state
+        """
+        self.current_round = 0
+        self.validation_error = False
         self.items = self.initialize_data()
 
     def initialize_data(self) -> List[Item]:

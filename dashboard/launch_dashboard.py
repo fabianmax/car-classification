@@ -43,7 +43,7 @@ def display_page(pathname: str) -> html:
         return main_layout(app, game_data, finish_page(app, game_data))
 
     elif pathname == '/':
-        return main_layout(app, game_data, start_page())
+        return main_layout(app, game_data, start_page(app, game_data))
 
     else:
         raise PreventUpdate

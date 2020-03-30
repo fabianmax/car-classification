@@ -134,12 +134,19 @@ def get_footer() -> html:
     return footer
 
 
-def start_page() -> html:
+def start_page(app: dash.Dash, data: GameData) -> html:
     """Layout for the start/index page
+
+    Arguments:
+        app {dash.Dash} -- dash app instance
+        data {GameData} -- game data
 
     Returns:
         html -- html layout
     """
+
+    data.reset()
+
     start_page = dbc.Container(
         dbc.Jumbotron([
             html.H1("Can you beat our AI?", className="display-3"),

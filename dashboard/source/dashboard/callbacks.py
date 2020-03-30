@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from app import app, game_data
-from source.data import LABELS, GameData, ItemLabel
+from source.data import LABELS, ItemLabel
 
 
 @app.callback(Output('url', 'pathname'), [Input('btn', 'n_clicks')],
@@ -106,23 +106,6 @@ def set_model_dropdown(car_brand: str) -> Tuple[bool, List[Dict[str, str]]]:
 
         else:
             return True, []
-
-    raise PreventUpdate
-
-
-@app.callback(Output("btn-reset", "hidden"), [Input("btn-reset", "n_clicks")])
-def reset(n_clicks: int) -> None:
-    """Reset the game state
-
-    Arguments:
-        n_clicks {int} -- number of clicks
-
-    Raises:
-        PreventUpdate: Sometimes there is a phantom click on page load; Ignore it
-    """
-    if n_clicks > 0:
-        global game_data
-        game_data = GameData()
 
     raise PreventUpdate
 
