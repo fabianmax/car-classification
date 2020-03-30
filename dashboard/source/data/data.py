@@ -50,21 +50,13 @@ class GameData:
 
         # Extract ground truth from the file name
         def extract_ground_truth(image_name: str) -> ItemLabel:
-            print(image_name)
             image_parts = str.split(image_name, '_')
             return ItemLabel(image_parts[0], image_parts[1])
 
         ground_truth = map(extract_ground_truth, image_list)
 
         for image, truth in zip(image_list, ground_truth):
-            prediction_ai = []
-
-            for _ in range(5):
-                # TODO: Fetch top 5 preds
-                label = self.get_ai_prediction(image)
-                # label = self.get_fake_label()
-                # label.certainty = random()
-                prediction_ai.append(label)
+            prediction_ai = self.get_ai_prediction(image)
 
             items.append(
                 Item(IMAGE_URL_EXTERNAL + image, 'TODO: explained image', prediction_ai,
@@ -72,12 +64,9 @@ class GameData:
 
         return items
 
-    def get_ai_prediction(self, image_name: str) -> ItemLabel:
-        # TODO: Return top 5 predictions for chart
-
+    def get_ai_prediction(self, image_name: str) -> List[ItemLabel]:
         # Download Picture
         img_url = IMAGE_URL_INTERNAL + quote(image_name)
-        print('url', img_url)
         img = imread(img_url)
 
         # Get Prediction from TF Serving
@@ -100,18 +89,21 @@ class GameData:
         response_body = json.loads(json_response.text)
         predictions = response_body['predictions']
 
-        label = CLASSES[int(np.argmax(predictions, axis=1))]
-        label_comp = label.split('_')
-        brand = label_comp[0]
-        model = label_comp[1]
-        certainty = np.max(predictions)
+        top_predictions = []
+        for idx in np.argpartition(predictions[0], -5)[-5:]:
+            label = CLASSES[idx]
+            label_comp = label.split('_')
+            brand = label_comp[0]
+            model = label_comp[1]
+            certainty = predictions[0][idx]
 
-        # print('Input Image:', image_name)
-        # print('Prediction Brand:', brand)
-        # print('Prediction Model:', model)
-        # print('Certainty:', certainty)
+            top_predictions.append(ItemLabel(brand, model, certainty))
 
-        return ItemLabel(brand, model, certainty)
+        top_predictions = sorted(top_predictions,
+                                 key=lambda x: x.certainty,
+                                 reverse=True)
+
+        return top_predictions
 
 
 @dataclass
