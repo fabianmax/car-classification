@@ -1,0 +1,5 @@
+#tensorflow and numpy is included in base image
+gunicorn==20.0.4
+Flask==1.1.1
+opencv-python==4.2.0.32
+pandas==1.0.1

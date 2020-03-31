@@ -1,13 +1,14 @@
-from flask import Flask, request, jsonify  # import main Flask class and request object
+import numpy as np
+from flask import (
+    Flask,  # import main Flask class and request object
+    jsonify,
+    request)
 
 import cv2
-import numpy as np
 import tensorflow as tf
-
-from car_classifier.modeling import TransferModel
-from tensorflow.keras.preprocessing import image
-
+from modeling import TransferModel
 from tensorflow.keras.applications.resnet_v2 import preprocess_input
+from tensorflow.keras.preprocessing import image
 
 # Global model settings
 INPUT_SHAPE = (224, 224, 3)
@@ -17,8 +18,7 @@ classes = [0, 1]
 
 # Load model
 model = TransferModel('ResNet', INPUT_SHAPE, classes=classes)
-model.load('/Users/stephanmueller/Google Drive/Car-Classifier/models/final_unfreeze_all_model_v3')
-
+model.load('/models/resnet_unfreeze_all_filtered/1')
 
 # Create instance of flask
 app = Flask(__name__)  # create the Flask app
@@ -46,8 +46,10 @@ def grad_cam():
 
     # # Load and prepare (normalize) image
     img = image.img_to_array(img)
-    img_to_plot = img/255.0
+    img = tf.image.resize_with_crop_or_pad(img, 224, 224)
+    img_to_plot = img / 255.0
     img = preprocess_input(img)
+    img = img.numpy()
 
     # Reshape image to (batch_size, heigh, width, channel)
     img = img.reshape(-1, *img.shape)
@@ -55,8 +57,9 @@ def grad_cam():
     # Gradient model, outputs tuple with:
     # - output of conv layer
     # - output of head layer
-    grad_model = tf.keras.models.Model([model.model.inputs],
-                                       [model.model.get_layer('conv5_block3_3_conv').output, model.model.output])
+    grad_model = tf.keras.models.Model(
+        [model.model.inputs],
+        [model.model.get_layer('conv5_block3_3_conv').output, model.model.output])
 
     # Run model and record outputs, loss, and gradients
     with tf.GradientTape() as tape:
@@ -88,11 +91,11 @@ def grad_cam():
 
     # Original image, reshape back, denormalize and adjust type to heatmap
     src_1 = img_to_plot
-    src_1 = np.uint8(255*src_1)
+    src_1 = np.uint8(255 * src_1)
     src_1 = cv2.cvtColor(src_1, cv2.COLOR_RGB2BGR)
 
     # Define color map based on heatmap
-    src_2 = np.uint8(255*heatmap)
+    src_2 = np.uint8(255 * heatmap)
     src_2 = cv2.applyColorMap(src_2, cv2.COLORMAP_RAINBOW)
 
     # Calculates the weighted sum of two arrays:
@@ -104,4 +107,4 @@ def grad_cam():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)  # run app in debug mode on port 5000
+    app.run(debug=True, host='0.0.0.0')  # run app in debug mode on port 5000

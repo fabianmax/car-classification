@@ -300,7 +300,7 @@ def result(app: dash.Dash, data: GameData) -> html:
     """
     item = data.items[data.current_round]
     img_raw = str(item.picture_raw)
-    # img_explained = str(item.picture_explained)
+    img_explained = item.picture_explained
     ai_prediction: Dict[str, Any] = {'x': [], 'y': []}
     ai_prediction['type'] = 'bar'
     ai_prediction['orientation'] = 'h'
@@ -362,39 +362,38 @@ def result(app: dash.Dash, data: GameData) -> html:
                          body=True))
         ],
                 className='mb-4'),
-        dbc.Row(
-            children=[
-                # dbc.Col(dbc.Card(dbc.CardImg(src=img_explained))),
-                dbc.Col(
-                    dbc.Card(
-                        dbc.CardBody(
-                            dcc.Graph(figure={
-                                'data': [ai_prediction],
-                                'layout': {
-                                    'margin': {
-                                        'l': 200
-                                    },
-                                    'yaxis': {
-                                        'automargin': True,
-                                        'autorange': 'reversed'
-                                    },
-                                    'xaxis': {
-                                        'automargin': True
-                                    },
-                                    'autosize': True
-                                }
-                            },
-                                      config={
-                                          'showTips': False,
-                                          'displayModeBar': False,
-                                          'doubleClick': False,
-                                      },
-                                      style={
-                                          'flex': 1,
-                                          'margin': '10px'
-                                      })), ))
-            ],
-            className='mb-4'),
+        dbc.Row(children=[
+            dbc.Col(dbc.Card(dbc.CardImg(src=img_explained))),
+            dbc.Col(
+                dbc.Card(
+                    dbc.CardBody(
+                        dcc.Graph(figure={
+                            'data': [ai_prediction],
+                            'layout': {
+                                'margin': {
+                                    'l': 200
+                                },
+                                'yaxis': {
+                                    'automargin': True,
+                                    'autorange': 'reversed'
+                                },
+                                'xaxis': {
+                                    'automargin': True
+                                },
+                                'autosize': True
+                            }
+                        },
+                                  config={
+                                      'showTips': False,
+                                      'displayModeBar': False,
+                                      'doubleClick': False,
+                                  },
+                                  style={
+                                      'flex': 1,
+                                      'margin': '10px'
+                                  })), ))
+        ],
+                className='mb-4'),
         # Needed to circumvent dash limitations
         # See: https://community.plot.ly/t/you-have-already-assigned-a-callback-to-the-output/25334
         html.Div([
