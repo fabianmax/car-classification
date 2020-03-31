@@ -39,7 +39,8 @@ class TransferModel:
         if self.base == 'ResNet':
             self.base_model = ResNet50V2(include_top=False,
                                          input_shape=self.shape,
-                                         weights='imagenet')
+                                         weights=None)
+                                         #weights='imagenet')
 
             self.base_model.trainable = False
             if unfreeze is not None:
