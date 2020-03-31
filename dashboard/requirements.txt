@@ -4,3 +4,4 @@ dash-bootstrap-components==0.9.1
 requests==2.23.0
 numpy==1.18.1
 imageio==2.8.0
+matplotlib==3.2.1
