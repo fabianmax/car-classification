@@ -17,4 +17,4 @@ WORKDIR /app
 ADD . /app
 
 # During debugging, this entry point will be overridden. For more information, refer to https://aka.ms/vscode-docker-python-debug
-CMD ["gunicorn", "--bind", "0.0.0.0:8050", "launch_dashboard:server"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8050", "--timeout", "60", "--worker-class", "gevent", "--worker-connections", "3", "launch_dashboard:server"]

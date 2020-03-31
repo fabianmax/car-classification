@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from base64 import b64encode
 from dataclasses import dataclass, field
 from io import BytesIO
@@ -8,6 +9,7 @@ from random import choices
 from typing import List
 from urllib.parse import quote
 
+import aiohttp
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
@@ -23,14 +25,14 @@ plt.switch_backend('Agg')
 is_in_docker = getenv('IS_IN_DOCKER', False)
 if not is_in_docker:
     IMAGE_URL_INTERNAL = IMAGE_URL_EXTERNAL = 'http://localhost:1234/'
-    PREDICTION_URL_INTERNAL = 'http://localhost:8501/v1/models/resnet_unfreeze_all_filtered:predict'
-    EXPLAINABILITY_URL_EXTERNAL = 'http://localhost:5000/grad-cam'
+    PREDICTION_URL = 'http://localhost:8501/v1/models/resnet_unfreeze_all_filtered:predict'
+    EXPLAINABILITY_URL = 'http://localhost:5000/grad-cam'
 
 else:
     IMAGE_URL_INTERNAL = 'http://nginx/'
     IMAGE_URL_EXTERNAL = 'http://localhost:1234/'
-    PREDICTION_URL_INTERNAL = 'http://tf_serving:8501/v1/models/resnet_unfreeze_all_filtered:predict'
-    EXPLAINABILITY_URL_EXTERNAL = 'http://explainability:5000/grad-cam'
+    PREDICTION_URL = 'http://tf_serving:8501/v1/models/resnet_unfreeze_all_filtered:predict'
+    EXPLAINABILITY_URL = 'http://explainability:5000/grad-cam'
 
 
 @dataclass
@@ -45,16 +47,16 @@ class GameData:
     def __post_init__(self) -> None:
         """Initialize data upon creation of the class
         """
-        self.items = self.initialize_data()
+        self.items = asyncio.run(self.initialize_data())
 
     def reset(self) -> None:
         """Reset the game state
         """
         self.current_round = 0
         self.validation_error = False
-        self.items = self.initialize_data()
+        self.items = asyncio.run(self.initialize_data())
 
-    def initialize_data(self) -> List[Item]:
+    async def initialize_data(self) -> List[Item]:
         """Initialize game data class with random selected images, the
         explainable images and the ai prediction
 
@@ -66,21 +68,45 @@ class GameData:
         images = self.get_images()
         ground_truth = map(self.extract_ground_truth, images)
 
-        for image, truth in zip(images, ground_truth):
-            # Download Picture from static web-server
-            img_url = IMAGE_URL_INTERNAL + quote(image)
-            img = imread(img_url)
+        async with aiohttp.ClientSession() as session:
+            tasks = []
 
-            # Get AI prediction
-            prediction_ai = self.get_ai_prediction(img)
-            image_explainability = self.image_array_to_string(
-                self.get_explainability(img, truth.brand + '_' + truth.model))
+            for image, truth in zip(images, ground_truth):
+                tasks.append(self.get_one_item(session, image, truth))
 
-            items.append(
-                Item(IMAGE_URL_EXTERNAL + image, image_explainability, prediction_ai,
-                     truth))
+            items = await asyncio.gather(*tasks)
 
         return items
+
+    async def get_one_item(self, session: aiohttp.ClientSession, image: str,
+                           truth: str) -> Item:
+        """Get explainable images and the ai prediction for one round
+
+        Arguments:
+            session {aiohttp.ClientSession} -- client session object
+            image {str} -- image
+            truth {str} -- label
+
+        Returns:
+            Item -- [description]
+        """
+        # Download Picture from static web-server
+        img_url = IMAGE_URL_INTERNAL + quote(image)
+        img = imread(img_url)
+
+        # Get AI prediction
+        prediction_ai = asyncio.create_task(self.get_ai_prediction(session, img))
+        image_explainability = asyncio.create_task(
+            self.get_explainability(session, img, truth.brand + '_' + truth.model))
+
+        result_prediction_ai = await prediction_ai
+        result_image_explainability = await image_explainability
+
+        encoded_image_explainability = self.image_array_to_string(
+            result_image_explainability)
+
+        return Item(IMAGE_URL_EXTERNAL + image, encoded_image_explainability,
+                    result_prediction_ai, truth)
 
     def extract_ground_truth(self, image_name: str) -> ItemLabel:
         """Extract car brand and car model from a image name
@@ -145,10 +171,12 @@ class GameData:
 
         return images
 
-    def get_ai_prediction(self, img: np.array) -> List[ItemLabel]:
+    async def get_ai_prediction(self, session: aiohttp.ClientSession,
+                                img: np.array) -> List[ItemLabel]:
         """Obtain prediction from ai
 
         Arguments:
+            session {aiohttp.ClientSession} -- client session object
             img {str} -- raw image
 
         Returns:
@@ -164,12 +192,12 @@ class GameData:
         # Send data as list to TF serving via json dump
         request_body = {"signature_name": "serving_default", "instances": img.tolist()}
         request_headers = {"content-type": "application/json"}
-        response = requests.post(PREDICTION_URL_INTERNAL,
-                                 json=request_body,
-                                 headers=request_headers)
-        predictions = response.json()['predictions']
+        response = await session.post(PREDICTION_URL,
+                                      json=request_body,
+                                      headers=request_headers)
+        predictions = await response.json()
+        predictions = predictions['predictions']
 
-        # Extract top 5 predictions and get the label for them
         top_predictions = []
         for idx in np.argpartition(predictions[0], -5)[-5:]:
             label = CLASSES[idx]
@@ -186,10 +214,12 @@ class GameData:
 
         return top_predictions
 
-    def get_explainability(self, img: np.array, label: str) -> np.array:
+    async def get_explainability(self, session: aiohttp.ClientSession, img: np.array,
+                                 label: str) -> np.array:
         """Obtain explained image from API
 
         Arguments:
+            session {aiohttp.ClientSession} -- client session object
             img {np.array} -- raw image
             label {str} -- label
 
@@ -198,9 +228,10 @@ class GameData:
         """
         body = {"label": label, "image": img.tolist()}
         header = {"content-type": "application/json"}
-        response = requests.post(EXPLAINABILITY_URL_EXTERNAL, json=body, headers=header)
+        response = await session.post(EXPLAINABILITY_URL, json=body, headers=header)
+        response_json = await response.json()
+        heatmap = response_json['heatmap']
 
-        heatmap = response.json()['heatmap']
         return heatmap
 
 
