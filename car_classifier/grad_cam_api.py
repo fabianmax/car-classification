@@ -46,9 +46,10 @@ def grad_cam():
 
     # # Load and prepare (normalize) image
     img = image.img_to_array(img)
-    img = cv2.resize(img, (224, 224))
+    img = tf.image.resize_with_crop_or_pad(img, 224, 224)
     img_to_plot = img / 255.0
     img = preprocess_input(img)
+    img = img.numpy()
 
     # Reshape image to (batch_size, heigh, width, channel)
     img = img.reshape(-1, *img.shape)
