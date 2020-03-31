@@ -1,16 +1,22 @@
 from __future__ import annotations
 
+from base64 import b64encode
 from dataclasses import dataclass, field
+from io import BytesIO
 from os import getenv
 from random import choices
 from typing import List
 from urllib.parse import quote
 
+import matplotlib.pyplot as plt
 import numpy as np
 import requests
 from imageio import imread
 
 from .labels import CLASSES
+
+# Set matplotlib to a non-interactive backend
+plt.switch_backend('Agg')
 
 # Check whether the script is running in a docker container.
 # Set the URLs accordingly
@@ -18,11 +24,13 @@ is_in_docker = getenv('IS_IN_DOCKER', False)
 if not is_in_docker:
     IMAGE_URL_INTERNAL = IMAGE_URL_EXTERNAL = 'http://localhost:1234/'
     PREDICTION_URL_INTERNAL = 'http://localhost:8501/v1/models/resnet_unfreeze_all_filtered:predict'
+    EXPLAINABILITY_URL_EXTERNAL = 'http://localhost:5000/grad-cam'
 
 else:
     IMAGE_URL_INTERNAL = 'http://nginx/'
     IMAGE_URL_EXTERNAL = 'http://localhost:1234/'
     PREDICTION_URL_INTERNAL = 'http://tf_serving:8501/v1/models/resnet_unfreeze_all_filtered:predict'
+    EXPLAINABILITY_URL_EXTERNAL = 'http://explainability:5000/grad-cam'
 
 
 @dataclass
@@ -59,10 +67,17 @@ class GameData:
         ground_truth = map(self.extract_ground_truth, images)
 
         for image, truth in zip(images, ground_truth):
-            prediction_ai = self.get_ai_prediction(image)
+            # Download Picture from static web-server
+            img_url = IMAGE_URL_INTERNAL + quote(image)
+            img = imread(img_url)
+
+            # Get AI prediction
+            prediction_ai = self.get_ai_prediction(img)
+            image_explainability = self.image_array_to_string(
+                self.get_explainability(img, truth.brand + '_' + truth.model))
 
             items.append(
-                Item(IMAGE_URL_EXTERNAL + image, 'TODO: explained image', prediction_ai,
+                Item(IMAGE_URL_EXTERNAL + image, image_explainability, prediction_ai,
                      truth))
 
         return items
@@ -78,6 +93,39 @@ class GameData:
         """
         image_parts = str.split(image_name, '_')
         return ItemLabel(image_parts[0], image_parts[1])
+
+    def image_array_to_string(self, image: np.array) -> str:
+        """Converts a numpy array to a base64 encoded image.
+        That is needed to pass it to a html atribute as the source value.
+
+        Arguments:
+            image {np.array} -- raw image
+
+        Returns:
+            str -- base64 encoded image
+        """
+        # Generate Matplotlib plot
+        sizes = np.shape(image)
+        fig = plt.figure()
+        fig.set_size_inches(1. * sizes[0] / sizes[1], 1, forward=False)
+        ax = plt.Axes(fig, [0., 0., 1., 1.])
+        ax.set_axis_off()
+        fig.add_axes(ax)
+        ax.imshow(image)
+
+        # Save Matplotlib image in output_image
+        output_image = BytesIO()
+        fig.savefig(output_image, format='png', dpi=sizes[0])
+
+        # Close all plots
+        fig.clf()
+        plt.close('all')
+
+        # Encode matplotlib plot as base64
+        output_image.seek(0)  # rewind file
+        encoded = b64encode(output_image.read()).decode("ascii").replace("\n", "")
+
+        return "data:image/png;base64,{}".format(encoded)
 
     def get_images(self) -> List[str]:
         """From the static web-server, get a list with all images
@@ -97,19 +145,15 @@ class GameData:
 
         return images
 
-    def get_ai_prediction(self, image_name: str) -> List[ItemLabel]:
+    def get_ai_prediction(self, img: np.array) -> List[ItemLabel]:
         """Obtain prediction from ai
 
         Arguments:
-            image_name {str} -- image name
+            img {str} -- raw image
 
         Returns:
             List[ItemLabel] -- Top 5 prediction from ai
         """
-        # Download Picture from static web-server
-        img_url = IMAGE_URL_INTERNAL + quote(image_name)
-        img = imread(img_url)
-
         # Get Prediction from TF Serving
         # Preprocess and reshape data
         img = img.astype(np.float32)
@@ -141,6 +185,23 @@ class GameData:
                                  reverse=True)
 
         return top_predictions
+
+    def get_explainability(self, img: np.array, label: str) -> np.array:
+        """Obtain explained image from API
+
+        Arguments:
+            img {np.array} -- raw image
+            label {str} -- label
+
+        Returns:
+            np.array -- explained image/heatmap
+        """
+        body = {"label": label, "image": img.tolist()}
+        header = {"content-type": "application/json"}
+        response = requests.post(EXPLAINABILITY_URL_EXTERNAL, json=body, headers=header)
+
+        heatmap = response.json()['heatmap']
+        return heatmap
 
 
 @dataclass
