@@ -3,8 +3,12 @@ FROM tensorflow/tensorflow:latest-py3
 
 EXPOSE 5000
 
-RUN ["apt-get", "update"]
-RUN ["apt-get", "install", "-y", "libsm6", "libxext6", "libxrender-dev"]
+# Install/Update dependencies for opencv
+RUN apt-get update && apt-get install -y \
+    libsm6 \
+    libxext6  \
+    libxrender-dev  \
+    && rm -rf /var/lib/apt/lists/*
 
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE 1
