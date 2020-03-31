@@ -26,13 +26,15 @@ services:
         aliases:
           - explainability
     volumes:
-      - ./Data/Model/:/models/resnet_unfreeze_all_filtered/1
+      - ./Data/Classes/classes.pickle:/models/resnet_unfreeze_all_filtered/1/classes.pickle
+      - ./Data/Model/:/models/resnet_unfreeze_all_filtered/1/model
   cardashboard:
     image: cardashboard
     container_name: cardashboard
     depends_on:
       - nginx
       - tfserving
+      - explainability
     build:
       context: ./dashboard
       dockerfile: Dockerfile

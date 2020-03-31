@@ -18,6 +18,8 @@ Note: At the end your folder structure should be similar to this one:
 +-- car_classifier
 +-- dashboard
 +-- Data
+|   +-- Classes
+|       +-- classes.pickle
 |   +-- Images
 |       +-- carbrand1_carmodel1_...._.jpg
 |       +-- carbrand2_carmodel2_...._.jpg

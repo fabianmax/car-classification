@@ -9,8 +9,9 @@ from tensorflow.keras.preprocessing import image
 
 
 # Global model settings
-INPUT_DATA_DIR = '/Users/stephanmueller/Intern/Projekte/Car-Classifier/car-classification/car_classifier/data/' \
-                 'final_filtered_split/test/'
+#INPUT_DATA_DIR = '/Users/stephanmueller/Intern/Projekte/Car-Classifier/car-classification/car_classifier/data/' \
+#                 'final_filtered_split/test/'
+INPUT_DATA_DIR = '../../Data/Images/'
 INPUT_SHAPE = (224, 224, 3)
 
 # All available training images
