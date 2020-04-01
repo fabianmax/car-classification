@@ -51,7 +51,7 @@ Link to full blog post on STATWORX.com (coming soon)
 
 We discussed multiple approaches to explain CNN classifier outputs. We introduced Grad-CAM in detail by discussing the code and looking at examples for the car model classifier. Most notably, the discriminatory regions highlighted by the Grad-CAM procedure are always focussed on the car and never on the backgrounds of the images. The result shows that the model works as we expect and indeed uses specific parts of the car to discriminate between different models.
 
-Link to full blog post on STATWORX.com (coming soon) 
+Link to full blog post on STATWORX.com (coming soon)   
 [Link to full blog post in this repo](https://github.com/fabianmax/car-classification/blob/master/blog/Blog_Part_3_Explainable_AI_for_Computer_Vision.md)
 
 ## Part 4: Integrating Deep Learning Models with Dash
