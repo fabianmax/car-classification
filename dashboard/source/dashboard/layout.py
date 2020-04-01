@@ -1,3 +1,4 @@
+from math import ceil
 from typing import Any, Dict, Tuple
 
 import dash
@@ -305,6 +306,7 @@ def result(app: dash.Dash, data: GameData) -> html:
     ai_prediction['type'] = 'bar'
     ai_prediction['orientation'] = 'h'
     ai_prediction['marker'] = {'color': COLOR_STATWORX}
+    max_axis_value = ceil(item.prediction_ai[0].certainty * 10.0) / 10.0
 
     # Prepare data for the plot
     for ai_item in item.prediction_ai:
@@ -363,15 +365,24 @@ def result(app: dash.Dash, data: GameData) -> html:
         ],
                 className='mb-4'),
         dbc.Row(children=[
-            dbc.Col(dbc.Card(dbc.CardImg(src=img_explained))),
+            dbc.Col(
+                dbc.Card([
+                    # dbc.CardBody(
+                    #    html.H4("How the AI sees the car", className="card-title")),
+                    dbc.CardImg(src=img_explained)
+                ])),
             dbc.Col(
                 dbc.Card(
-                    dbc.CardBody(
+                    dbc.CardBody([
+                        # html.H4("Top 5 AI Predictions", className="card-title"),
                         dcc.Graph(figure={
                             'data': [ai_prediction],
                             'layout': {
                                 'margin': {
-                                    'l': 200
+                                    'l': 100,
+                                    'r': 0,
+                                    'b': 0,
+                                    't': 0
                                 },
                                 'yaxis': {
                                     'automargin': True,
@@ -380,7 +391,7 @@ def result(app: dash.Dash, data: GameData) -> html:
                                 'xaxis': {
                                     'automargin': True,
                                     'tickformat': '.2%',
-                                    'range': [0, 1]
+                                    'range': [0, max_axis_value]
                                 },
                                 'autosize': True
                             }
@@ -393,7 +404,8 @@ def result(app: dash.Dash, data: GameData) -> html:
                                   style={
                                       'flex': 1,
                                       'margin': '10px'
-                                  })), ))
+                                  })
+                    ]), ))
         ],
                 className='mb-4'),
         # Needed to circumvent dash limitations
