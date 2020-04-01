@@ -1,6 +1,6 @@
 # Car Classification using Transfer Learning in TensorFlow 2.x
 
-This repository containes code and documentation for a series of blog posts I wrote together with [Stephan Müller](https://github.com/mueller-stephan) for our [STATWORX blog](https://www.statworx.com/de/blog).
+This repository containes code and documentation for a series of blog posts I wrote together with [Stephan Müller](https://github.com/mueller-stephan) and [Dominique Lade](https://github.com/DominiqueLade) for our [STATWORX blog](https://www.statworx.com/de/blog).
 
 The series was originally inspired by this [reddit post](https://www.reddit.com/r/MachineLearning/comments/ek5zwv/p_64000_pictures_of_cars_labeled_by_make_model/?utm_source=share&utm_medium=ios_app&utm_name=iossmf). If you want to reproduce the results, please find the data available [here](https://drive.google.com/file/d/1TQQuT60bddyeGBVfwNOk6nxYavxQdZJD/view) or alternatively go to the original [GitHub repo](https://github.com/nicolas-gervais/predicting-car-price-from-scraped-data/tree/master/picture-scraper).   
 
@@ -50,7 +50,7 @@ Link to full blog post on STATWORX.com (coming soon)
 
 We discussed multiple approaches to explain CNN classifier outputs. We introduced Grad-CAM in detail by discussing the code and looking at examples for the car model classifier. Most notably, the discriminatory regions highlighted by the Grad-CAM procedure are always focussed on the car and never on the backgrounds of the images. The result shows that the model works as we expect and indeed uses specific parts of the car to discriminate between different models.
 
-Link to full blog post on STATWORX.com (coming soon) 
+Link to full blog post on STATWORX.com (coming soon)   
 [Link to full blog post in this repo](https://github.com/fabianmax/car-classification/blob/master/blog/Blog_Part_3_Explainable_AI_for_Computer_Vision.md)
 
 ## Part 4: Integrating Deep Learning Models with Dash
