@@ -378,7 +378,9 @@ def result(app: dash.Dash, data: GameData) -> html:
                                     'autorange': 'reversed'
                                 },
                                 'xaxis': {
-                                    'automargin': True
+                                    'automargin': True,
+                                    'tickformat': '.2%',
+                                    'range': [0, 1]
                                 },
                                 'autosize': True
                             }
