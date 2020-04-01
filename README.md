@@ -17,19 +17,18 @@ Note: At the end your folder structure should be similar to this one:
 .
 +-- car_classifier
 +-- dashboard
-+-- Data
-|   +-- Classes
-|       +-- classes.pickle
-|   +-- Images
++-- data   
+|   +-- images
 |       +-- carbrand1_carmodel1_...._.jpg
 |       +-- carbrand2_carmodel2_...._.jpg
 |       +-- carbrand3_carmodel3_...._.jpg
-|   +-- Model
-|       +-- saved_model.pb
-|       +-- variables
-|           +-- variables.index
-|           +-- variables.data-00001-of-00002
-|           +-- variables.data-00000-of-00002
++-- model
+|   +-- saved_model.pb
+|   +-- classes.pickle
+|   +-- variables
+|      +-- variables.index
+|       +-- variables.data-00001-of-00002
+|       +-- variables.data-00000-of-00002
 |-- ...
 ```
 

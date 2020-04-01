@@ -10,7 +10,7 @@ services:
         aliases:
           - tf_serving
     volumes:
-      - ./Data/Model/:/models/resnet_unfreeze_all_filtered/1
+      - ./model/:/models/resnet_unfreeze_all_filtered/1
     environment:
       - MODEL_NAME=resnet_unfreeze_all_filtered
 
@@ -27,8 +27,9 @@ services:
         aliases:
           - explainability
     volumes:
-      - ./Data/Classes/classes.pickle:/models/resnet_unfreeze_all_filtered/1/classes.pickle
-      - ./Data/Model/:/models/resnet_unfreeze_all_filtered/1/model
+      - ./model/classes.pickle:/models/resnet_unfreeze_all_filtered/1/classes.pickle
+      - ./model/saved_model.pb:/models/resnet_unfreeze_all_filtered/1/model/saved_model.pb
+      - ./model/variables/:/models/resnet_unfreeze_all_filtered/1/model/variables
 
   dashboard:
     image: car-classifier/dashboard
@@ -58,7 +59,7 @@ services:
         aliases:
           - nginx
     volumes:
-      - ./Data/Images/:/usr/share/nginx/html:ro
+      - ./data/images/:/usr/share/nginx/html:ro
       - ./dashboard/nginx.conf:/etc/nginx/nginx.conf:ro
 
 networks:
