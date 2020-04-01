@@ -6,8 +6,8 @@ The series was originally inspired by this [reddit post](https://www.reddit.com/
 
 ## How to use this Repo?
 1. Download/Clone this repo (`git clone https://github.com/fabianmax/car-classification.git`)
-2. Copy Images into Data/Images
-3. Copy Model into Data/Model
+2. Copy Images into data/images folder
+3. Copy Model into model folder
 4. Execute docker-compose file (`docker-compose up`)
 5. Open http://localhost:8050/ and start playing! (`open http://localhost:8050/`)
 
