@@ -55,4 +55,7 @@ Link to full blog post on STATWORX.com (coming soon)
 
 ## Part 4: Integrating Deep Learning Models with Dash
 
-*coming soon*
+In this blog post, we'll transform our machine learning predictions and explanations into a fun and exciting game. We present the user an image of a car. The user has to guess what kind of car model and brand it is - the machine learning model will do the same. After 5 rounds, we'll evaluate who is better in prediction the car brand - the user or the model.
+
+Link to full blog post on STATWORX.com (coming soon)   
+[Link to full blog post in this repo](https://github.com/fabianmax/car-classification/blob/master/blog/Blog_Part_4_Integrating_Deep_Learning_Models_with_Dash.md)
