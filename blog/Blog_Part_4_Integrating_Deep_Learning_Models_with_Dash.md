@@ -1,7 +1,7 @@
 # Integrating Deep Learning Models with Dash
 In the last three posts of this series, we explained how to train a deep-learning model to classify a car by its brand and model given an image of a car (Part 1; Include link), how to deploy that model from a docker container with TensorFlow Serving (Part 2; Include link) and how to explain the model's predictions (Part 3; Include link). In this post, we'll teach you how to build a good looking interface around our car classifier using Dash.
 
-We'll transform our machine learning predictions and explanations into a fun and exciting game. We present the user an image of a car. The user has to guess what kind of car model and brand it is - the machine learning model will do the same. After 5 rounds, we'll evaluate who is better in prediction the car brand - the user or the model.
+We'll transform our machine learning predictions and explanations into a fun and exciting game. We present the user an image of a car. The user has to guess what kind of car model and brand it is - the machine learning model will do the same. After 5 rounds, we'll evaluate who is better in predicting the car brand - the user or the model.
 
 ![Car Dashboard Animation](car-dashboard.gif)
 
@@ -19,6 +19,12 @@ The files for the frontend itself are logically split into several parts. Althou
 Let's start with the last part, the main entry point for our dashboard. If you know how to write a web app, like a Dash application or also a Flask app, you are familiar with the concept of an app instance. In simple terms, the app instance is everything. It contains the configuration for the app and eventually the whole layout. In our case, we initialize the app instance directly with the Bootstrap CSS files to make the styling easier. In the same step, we expose the underlying flask app. The flask app is used to serve the frontend in a productive environment. 
 
 ```python
+# app.py
+import dash
+import dash_bootstrap_components as dbc
+
+# ...
+
 # Initialize Dash App with Bootstrap CSS
 app = dash.Dash(
     __name__,
@@ -32,6 +38,14 @@ server = app.server
 This setting is used for every Dash application. In contrast to a dashboard, we need a way to handle several URL paths. More precise, if the user enters `/attempt` we want to give him the opportunity to guess a car, if he enters `/result` we want to show the result of his prediction. First, we define the layout. Notable, it is initially basically empty. You find a special Dash Core Component there. It is used to store the current URL there. This component works in both ways. With a callback, we can read the content, figure out which page the user wants to access and render the layout accordingly. We can also manipulate the content of this component, which is practically speaking a redirection to another site. The empty `div` is used as a placeholder for the actual layout.
 
 ```python
+# launch_dashboard.py
+import dash_bootstrap_components as dbc
+import dash_core_components as dcc
+import dash_html_components as html
+from app import app
+
+# ...
+
 # Set Layout
 app.layout = dbc.Container(
     [dcc.Location(id='url', refresh=False),
@@ -43,6 +57,13 @@ The magic happens in the following function. The function itself has one argumen
 To get this function actually working we have to decorate it with the callback decorator. Every callback needs at least one input and at least one output. A change in the input triggers the function. The input is simply the location component defined above, with the property `pathname`. In simple terms, for whatever reason the path changes, this function gets triggered. The output is the new layout, rendered in the previously initially empty div. 
 
 ```python
+# launch_dashboard.py
+import dash_html_components as html
+from dash.dependencies import Input, Output
+from dash.exceptions import PreventUpdate
+
+# ...
+
 @app.callback(Output('main-page', 'children'), [Input('url', 'pathname')])
 def display_page(pathname: str) -> html:
     """Function to define the routing. Mapping routes to layout.
@@ -78,6 +99,12 @@ Let's start with the layout of our app - how should it look like? We opted for a
 Coming back to the Dash part, we build a function for every independent layout piece. The header, footer and one for every URL the user could access. For the header it looks like this:
 
 ```python
+# layout.py
+import dash_bootstrap_components as dbc
+import dash_html_components as html
+
+# ...
+
 def get_header(app: dash.Dash, data: GameData) -> html:
     """Layout for the header
 
