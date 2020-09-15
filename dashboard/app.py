@@ -1,3 +1,5 @@
+from os import getenv
+
 import dash
 import dash_bootstrap_components as dbc
 
@@ -21,13 +23,17 @@ app.config.suppress_callback_exceptions = True
 
 # in order to work on shinyproxy
 # see https://support.openanalytics.eu/t/what-is-the-best-way-of-delivering-static-assets-to-the-client-for-custom-apps/363/5
-app.config.update({
-    # as the proxy server will remove the prefix
-    'routes_pathname_prefix': '',
-    # the front-end will prefix this string to the requests
-    # that are made to the proxy server
-    'requests_pathname_prefix': ''
-})
+is_in_docker = getenv('IS_IN_SHINY_PROXY', False)
+if is_in_docker:
+    app.config.update({
+        # as the proxy server will remove the prefix
+        #'url_base_pathname': '/app/car-dashboard/',
+        'routes_pathname_prefix': '',
+
+        # the front-end will prefix this string to the requests
+        # that are made to the proxy server
+        'requests_pathname_prefix': '/app_direct/car-dashboard/'
+    })
 
 # Load Game Data
 game_data = GameData()

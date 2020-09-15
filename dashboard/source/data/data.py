@@ -13,6 +13,7 @@ import aiohttp
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
+
 from imageio import imread
 
 from .labels import CLASSES

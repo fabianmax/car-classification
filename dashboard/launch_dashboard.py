@@ -9,7 +9,7 @@ from app import server  # noqa: F401
 from app import app, game_data
 # Needed to "active" callbacks
 from source.dashboard import callbacks  # noqa: F401
-from source.dashboard import (attempt, finish_page, main_layout, result, start_page)
+from source.dashboard import attempt, finish_page, main_layout, result, start_page
 
 # Set title
 app.title = 'Beat the AI - Car Edition'
@@ -33,16 +33,23 @@ def display_page(pathname: str) -> html:
     Returns:
         html -- layout
     """
-    if pathname == '/attempt':
+    print('enter display page')
+    print('pathname', pathname)
+    
+    # if pathname == '/attempt':
+    if pathname.endswith('/attempt'):
         return main_layout(app, game_data, attempt(app, game_data))
 
-    elif pathname == '/result':
+    # elif pathname == '/result':
+    elif pathname.endswith('/result'):
         return main_layout(app, game_data, result(app, game_data))
 
-    elif pathname == '/finish':
+    # elif pathname == '/finish':
+    elif pathname.endswith('/finish'):
         return main_layout(app, game_data, finish_page(app, game_data))
 
-    elif pathname == '/':
+    # elif pathname == '/':
+    elif pathname.endswith('/'):
         return main_layout(app, game_data, start_page(app, game_data))
 
     else:
