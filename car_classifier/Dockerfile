@@ -23,4 +23,4 @@ RUN python -m pip install -r requirements.txt
 WORKDIR /app
 ADD . /app
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "60", "grad_cam_api:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "300", "grad_cam_api:app"]
