@@ -1,4 +1,5 @@
 proxy:
+  heartbeat-timeout: 600000
   port: 8080
   authentication: none
   docker:
