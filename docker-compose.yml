@@ -31,23 +31,23 @@ services:
       - ./model/saved_model.pb:/models/resnet_unfreeze_all_filtered/1/model/saved_model.pb
       - ./model/variables/:/models/resnet_unfreeze_all_filtered/1/model/variables
 
-#  dashboard:
-#    image: car-classifier/dashboard
-#    container_name: car-classifier.dashboard
-#    depends_on:
-#      - nginx
-#      - tfserving
-#      - explainability
-#    build:
-#      context: ./dashboard
-#      dockerfile: Dockerfile
-#    ports:
-#      - 8050:8050
-#    networks:
-#      - network-car-classifier
-#    environment:
-#      - IS_IN_DOCKER=True
-#    restart: on-failure
+  dashboard:
+    image: car-classifier/dashboard
+    container_name: car-classifier.dashboard
+    depends_on:
+      - nginx
+      - tfserving
+      - explainability
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    ports:
+      - 8050:8050
+    networks:
+      - network-car-classifier
+    environment:
+      - IS_IN_DOCKER=True
+    restart: on-failure
 
   nginx:
     image: nginx
