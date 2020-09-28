@@ -125,7 +125,7 @@ def get_footer() -> html:
         html.Hr(),
         html.Div([
             'Made with ❤ in Frankfurt from ',
-            dcc.Link(children='Statworx',
+            dcc.Link(children='STATWORX',
                      href='https://www.statworx.com/',
                      style={"color": COLOR_STATWORX})
         ])
