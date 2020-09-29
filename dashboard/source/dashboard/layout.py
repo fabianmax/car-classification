@@ -5,7 +5,6 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-
 from source.data import LABELS, GameData
 
 COLOR_STATWORX = "#013848"
@@ -98,6 +97,14 @@ def get_header(app: dash.Dash, data: GameData) -> html:
                         dbc.Button([
                             "AI:",
                             dbc.Badge(score_ai, color="light", className="ml-1")
+                        ],
+                                   className="mr-2"),
+                        dbc.Button([
+                            "Rounds:",
+                            dbc.Badge(str(data.current_round + 1) + '/' +
+                                      str(data.max_rounds + 1),
+                                      color="light",
+                                      className="ml-1")
                         ])
                     ]),
                     no_gutters=True,
@@ -123,11 +130,16 @@ def get_footer() -> html:
     """
     footer = dbc.Container([
         html.Hr(),
-        html.Div([
-            'Made with ❤ in Frankfurt from ',
-            dcc.Link(children='STATWORX',
-                     href='https://www.statworx.com/',
-                     style={"color": COLOR_STATWORX})
+        dbc.Row([
+            dbc.Col([
+                'Made with ❤ in Frankfurt from ',
+                dcc.Link(children='STATWORX',
+                         href='https://www.statworx.com/',
+                         style={"color": COLOR_STATWORX}),
+            ]),
+            dbc.Col(dcc.Link(
+                children='Try Again!', href='/', style={"color": COLOR_STATWORX}),
+                    className="text-right")
         ])
     ],
                            className='mb-4')
@@ -145,7 +157,6 @@ def start_page(app: dash.Dash, data: GameData) -> html:
     Returns:
         html -- html layout
     """
-
     data.reset()
 
     start_page = dbc.Container(
@@ -161,6 +172,13 @@ def start_page(app: dash.Dash, data: GameData) -> html:
             P("We'll show you a picture of a car (part) and you'll have to guess "
               "its brand and model. Our AI will do the same. Let's see who's better at "
               "guessing cars in the next 5 rounds! ;)"),
+            html.Hr(className="my-2"),
+            html.P([
+                "If you want to learn more about how we build this app - check out the ",
+                dcc.Link(children='blog post',
+                         href='https://www.statworx.com/de/blog/',
+                         style={"color": COLOR_STATWORX}), " on our STATWORX blog."
+            ]),
             html.P(dbc.Button("Let's Play!",
                               color="primary",
                               href="/attempt",
@@ -364,50 +382,51 @@ def result(app: dash.Dash, data: GameData) -> html:
                          body=True))
         ],
                 className='mb-4'),
-        dbc.Row(children=[
-            dbc.Col(
-                dbc.Card([
-                    # dbc.CardBody(
-                    #    html.H4("How the AI sees the car", className="card-title")),
-                    dbc.CardImg(src=img_explained)
-                ])),
-            dbc.Col(
-                dbc.Card(
-                    dbc.CardBody([
-                        # html.H4("Top 5 AI Predictions", className="card-title"),
-                        dcc.Graph(figure={
-                            'data': [ai_prediction],
-                            'layout': {
-                                'margin': {
-                                    'l': 100,
-                                    'r': 0,
-                                    'b': 0,
-                                    't': 0
-                                },
-                                'yaxis': {
-                                    'automargin': True,
-                                    'autorange': 'reversed'
-                                },
-                                'xaxis': {
-                                    'automargin': True,
-                                    'tickformat': '.2%',
-                                    'range': [0, max_axis_value]
-                                },
-                                'autosize': True
-                            }
-                        },
-                                  config={
-                                      'showTips': False,
-                                      'displayModeBar': False,
-                                      'doubleClick': False,
-                                  },
-                                  style={
-                                      'flex': 1,
-                                      'margin': '10px'
-                                  })
-                    ]), ))
-        ],
-                className='mb-4'),
+        dbc.Row(
+            children=[
+                dbc.Col(
+                    dbc.Card([
+                        # dbc.CardBody(
+                        #    html.H4("How the AI sees the car", className="card-title")),
+                        dbc.CardImg(src=img_explained)
+                    ])),
+                dbc.Col(
+                    dbc.Card(
+                        dbc.CardBody([
+                            # html.H4("Top 5 AI Predictions", className="card-title"),
+                            dcc.Graph(figure={
+                                'data': [ai_prediction],
+                                'layout': {
+                                    'margin': {
+                                        'l': 100,
+                                        'r': 0,
+                                        'b': 0,
+                                        't': 0
+                                    },
+                                    'yaxis': {
+                                        'automargin': True,
+                                        'autorange': 'reversed'
+                                    },
+                                    'xaxis': {
+                                        'automargin': True,
+                                        'tickformat': '.2%',
+                                        'range': [0, max_axis_value]
+                                    },
+                                    'autosize': True
+                                }
+                            },
+                                      config={
+                                          'showTips': False,
+                                          'displayModeBar': False,
+                                          'doubleClick': False,
+                                      },
+                                      style={
+                                          'flex': 1,
+                                          'margin': '10px'
+                                      })
+                        ]), ))
+            ],
+            className='mb-4'),
         # Needed to circumvent dash limitations
         # See: https://community.plot.ly/t/you-have-already-assigned-a-callback-to-the-output/25334
         html.Div([

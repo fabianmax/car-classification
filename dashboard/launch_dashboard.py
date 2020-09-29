@@ -25,7 +25,7 @@ def display_page(pathname: str) -> html:
     """Function to define the routing. Mapping routes to layout.
 
     Arguments:
-        pathname {str} -- pathname from url/browser
+        pathname (str) -- pathname from url/browser
 
     Raises:
         PreventUpdate: Unknown/Invalid route, do nothing
@@ -33,23 +33,20 @@ def display_page(pathname: str) -> html:
     Returns:
         html -- layout
     """
-    print('enter display page')
-    print('pathname', pathname)
-    
-    # if pathname == '/attempt':
     if pathname.endswith('/attempt'):
+        game_data.path = '/attempt'
         return main_layout(app, game_data, attempt(app, game_data))
 
-    # elif pathname == '/result':
     elif pathname.endswith('/result'):
+        game_data.path = '/result'
         return main_layout(app, game_data, result(app, game_data))
 
-    # elif pathname == '/finish':
     elif pathname.endswith('/finish'):
+        game_data.path = '/finish'
         return main_layout(app, game_data, finish_page(app, game_data))
 
-    # elif pathname == '/':
     elif pathname.endswith('/'):
+        game_data.path = '/'
         return main_layout(app, game_data, start_page(app, game_data))
 
     else:
