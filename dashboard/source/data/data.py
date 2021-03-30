@@ -30,7 +30,7 @@ if not is_in_docker:
 
 else:
     IMAGE_URL_INTERNAL = 'http://nginx/'
-    IMAGE_URL_EXTERNAL = 'http://34.107.39.154:1234/'
+    IMAGE_URL_EXTERNAL = 'http://localhost:1234/'
     PREDICTION_URL = 'http://tf_serving:8501/v1/models/resnet_unfreeze_all_filtered:predict'
     EXPLAINABILITY_URL = 'http://explainability:5000/grad-cam'
 
