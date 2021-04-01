@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 services:
   tfserving:
     image: tensorflow/serving
@@ -62,23 +62,23 @@ services:
       - ./data/images/:/usr/share/nginx/html:ro
       - ./dashboard/nginx.conf:/etc/nginx/nginx.conf:ro
 
-  dashboard-shiny-proxy:
-    image: car-classifier/dashboard-shiny-proxy
-    container_name: car-classifier.dashboard-shiny-proxy
-    depends_on:
-      - nginx
-      - tfserving
-      - explainability
-    build:
-      context: ./dashboard/shinyproxy
-      dockerfile: Dockerfile
-    ports:
-      - 8080:8080
-    networks:
-      - network-car-classifier
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: on-failure
+  #dashboard-shiny-proxy:
+  #  image: car-classifier/dashboard-shiny-proxy
+  #  container_name: car-classifier.dashboard-shiny-proxy
+  #  depends_on:
+  #    - nginx
+  #    - tfserving
+  #    - explainability
+  #  build:
+  #    context: ./dashboard/shinyproxy
+  #    dockerfile: Dockerfile
+  #  ports:
+  #    - 8080:8080
+  #  networks:
+  #    - network-car-classifier
+  #  volumes:
+  #    - /var/run/docker.sock:/var/run/docker.sock
+  #  restart: on-failure
 
 networks:
   network-car-classifier:
