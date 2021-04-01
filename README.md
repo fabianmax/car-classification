@@ -34,28 +34,36 @@ Note: At the end your folder structure should be similar to this one:
 
 ## Part 1: Transfer Learning using ResNet50V2 in TensorFlow
 
-In this blog, we have applied transfer learning using the ResNet50V2 to classify the car model from images of cars. Our model achieves 70% categorical accuracy over 300 classes. We found unfreezing the entire base model and using a small learning rate to achieve the best results.
+In this blog, we have applied transfer learning using the ResNet50V2 to classify the car model from images of cars. 
+Our model achieves 70% categorical accuracy over 300 classes. We found unfreezing the entire base model and using a 
+small learning rate to achieve the best results.
 
 Link to full blog post on STATWORX.com (coming soon)  
-[Link to full blog post in this repo](https://github.com/fabianmax/car-classification/blob/master/blog/Blog_Part_1_Transfer_Learning_with_ResNet.md)
 
 ## Part 2: Deploying TensorFlow Models in Docker using TensorFlow Serving
 
-In this blog post, we have served a TensorFlow model for image recognition using TensorFlow Serving. To do so, we first saved the model using the SavedModel format. Next, we started the TensorFlow Serving server in a Docker container. Finally, we showed how to request predictions from the model using the API endpoints and a correct specified request body.
+In this blog post, we have served a TensorFlow model for image recognition using TensorFlow Serving. 
+To do so, we first saved the model using the SavedModel format. Next, we started the TensorFlow Serving server in a 
+Docker container. Finally, we showed how to request predictions from the model using the API endpoints and a correct 
+specified request body.
 
 Link to full blog post on STATWORX.com (coming soon)  
-[Link to full blog post in this repo](https://github.com/fabianmax/car-classification/blob/master/blog/Blog_Part_2_Deploying_TensorFlow_Models_in_Docker_using_TensorFlow_Serving.md)
 
 ## Part 3: Explainability of Deep Learning Models with Grad-CAM
 
-We discussed multiple approaches to explain CNN classifier outputs. We introduced Grad-CAM in detail by discussing the code and looking at examples for the car model classifier. Most notably, the discriminatory regions highlighted by the Grad-CAM procedure are always focussed on the car and never on the backgrounds of the images. The result shows that the model works as we expect and indeed uses specific parts of the car to discriminate between different models.
+We discussed multiple approaches to explain CNN classifier outputs. We introduced Grad-CAM in detail by discussing the 
+code and looking at examples for the car model classifier. Most notably, the discriminatory regions highlighted by the 
+Grad-CAM procedure are always focussed on the car and never on the backgrounds of the images. 
+The result shows that the model works as we expect and indeed uses specific parts of the car to 
+discriminate between different models.
 
 Link to full blog post on STATWORX.com (coming soon)   
-[Link to full blog post in this repo](https://github.com/fabianmax/car-classification/blob/master/blog/Blog_Part_3_Explainable_AI_for_Computer_Vision.md)
 
 ## Part 4: Integrating Deep Learning Models with Dash
 
-In this blog post, we'll transform our machine learning predictions and explanations into a fun and exciting game. We present the user an image of a car. The user has to guess what kind of car model and brand it is - the machine learning model will do the same. After 5 rounds, we'll evaluate who is better in prediction the car brand - the user or the model.
+In this blog post, we'll transform our machine learning predictions and explanations into a fun and exciting game. 
+We present the user an image of a car. The user has to guess what kind of car model and brand it is - 
+the machine learning model will do the same. After 5 rounds, we'll evaluate who is better in prediction the car brand - 
+the user or the model.
 
 Link to full blog post on STATWORX.com (coming soon)   
-[Link to full blog post in this repo](https://github.com/fabianmax/car-classification/blob/master/blog/Blog_Part_4_Integrating_Deep_Learning_Models_with_Dash.md)
