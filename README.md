@@ -38,7 +38,8 @@ In this blog, we have applied transfer learning using the ResNet50V2 to classify
 Our model achieves 70% categorical accuracy over 300 classes. We found unfreezing the entire base model and using a 
 small learning rate to achieve the best results.
 
-Link to full blog post on STATWORX.com (coming soon)  
+[Link to full blog post on STATWORX.com]( https://www.statworx.com/en/blog/car-model-classification-i-transfer-learning-with-resnet/
+)
 
 ## Part 2: Deploying TensorFlow Models in Docker using TensorFlow Serving
 
@@ -47,7 +48,7 @@ To do so, we first saved the model using the SavedModel format. Next, we started
 Docker container. Finally, we showed how to request predictions from the model using the API endpoints and a correct 
 specified request body.
 
-Link to full blog post on STATWORX.com (coming soon)  
+[Link to full blog post on STATWORX.com](https://www.statworx.com/en/blog/deploying-tensorflow-models-in-docker-using-tensorflow-serving/)
 
 ## Part 3: Explainability of Deep Learning Models with Grad-CAM
 
