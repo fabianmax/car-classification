@@ -18,7 +18,7 @@ sample_path = sample(files, 1)[0]
 img = imread(INPUT_DATA_DIR + sample_path)
 
 # Send data as list to TF serving via json dump
-request_url = 'http://localhost:5000/grad-cam'
+request_url = 'http://localhost:5001/grad-cam'
 request_body = {"label": sample_path, "image": img.tolist()}
 request_headers = {"content-type": "application/json"}
 response = requests.post(request_url, json=request_body, headers=request_headers)

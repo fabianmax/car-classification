@@ -1,7 +1,7 @@
 #FROM python:3.8
 FROM tensorflow/tensorflow:latest-py3
 
-EXPOSE 5000
+EXPOSE 5001
 
 # Install/Update dependencies for opencv
 RUN apt-get update && apt-get install -y \
@@ -23,4 +23,4 @@ RUN python -m pip install -r requirements.txt
 WORKDIR /app
 ADD . /app
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "300", "grad_cam_api:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--timeout", "300", "grad_cam_api:app"]

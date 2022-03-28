@@ -26,13 +26,13 @@ is_in_docker = getenv('IS_IN_DOCKER', False)
 if not is_in_docker:
     IMAGE_URL_INTERNAL = IMAGE_URL_EXTERNAL = 'http://localhost:1234/'
     PREDICTION_URL = 'http://localhost:8501/v1/models/resnet_unfreeze_all_filtered:predict'
-    EXPLAINABILITY_URL = 'http://localhost:5000/grad-cam'
+    EXPLAINABILITY_URL = 'http://localhost:5001/grad-cam'
 
 else:
     IMAGE_URL_INTERNAL = 'http://nginx/'
     IMAGE_URL_EXTERNAL = 'http://localhost:1234/'
     PREDICTION_URL = 'http://tf_serving:8501/v1/models/resnet_unfreeze_all_filtered:predict'
-    EXPLAINABILITY_URL = 'http://explainability:5000/grad-cam'
+    EXPLAINABILITY_URL = 'http://explainability:5001/grad-cam'
 
 
 @dataclass
